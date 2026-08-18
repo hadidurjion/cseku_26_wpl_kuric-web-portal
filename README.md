@@ -2,7 +2,7 @@
 
 Official web portal for the **Khulna University Research and Innovation Center (KURIC)** — a combined public information website and research-proposal management system.
 
-Full requirements are documented in [`docs/KURIC_SRS_v1.docx`](docs/KURIC_SRS_v1.docx).
+Full requirements are documented in [`kuric-web-portal/KURIC_SRS_v1.docx`](kuric-web-portal/KURIC_SRS_v1.docx).
 
 ## Team
 
