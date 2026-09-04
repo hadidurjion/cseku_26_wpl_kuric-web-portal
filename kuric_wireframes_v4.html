@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KURIC Web Portal — UI Screens</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --ink:#14181D; --muted:#55524A; --body:#3A382F;
+  --teal:#0E6E5C; --teal-dark:#0B5A4A; --teal-tint:#DCEEE9; --teal-tint-b:#A7D6CB;
+  --gold:#C89B3C; --gold-dark:#8A5F17; --gold-tint:#F7EACB; --gold-tint-b:#E9CD86;
+  --danger:#B24B36; --danger-dark:#96311F; --danger-tint:#F7DDD6; --danger-tint-b:#E6B4A4;
+  --border:#DDD7C8; --border-strong:#C9C2AE;
+  --bg:#FAF8F3; --surface:#FFFFFF; --chrome:#F0EEE6;
+  --sidebar-w:270px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:#EFEBE0;font-family:'Inter',sans-serif;color:var(--ink);}
+.app{display:flex;min-height:100vh;}
+
+.sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.brand{padding:0 20px 18px;margin-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.brand .mark{width:32px;height:32px;border-radius:8px;background:var(--teal);flex:0 0 auto;}
+.brand h1{font-family:'Fraunces',serif;font-size:16px;font-weight:700;margin:0;color:var(--ink);}
+.brand p{font-size:11px;color:var(--muted);margin:2px 0 0;font-weight:500;}
+
+.role-group{margin-top:16px;}
+.role-head{padding:0 20px;margin-bottom:6px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.screen-btn{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:8px 20px 8px 20px;font-size:12.8px;color:var(--body);font-weight:500;border-left:3px solid transparent;font-family:'Inter',sans-serif;}
+.screen-btn .num{font-size:11px;color:var(--muted);flex:0 0 16px;font-weight:600;}
+.screen-btn:hover{background:var(--teal-tint);}
+.screen-btn.active{background:var(--teal-tint);border-left:3px solid var(--teal);font-weight:700;color:var(--teal-dark);}
+
+.main{flex:1;padding:32px 40px 60px;min-width:0;}
+.topbar{margin-bottom:16px;}
+.crumb{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px;}
+.stitle{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--ink);}
+.note{max-width:860px;margin:16px auto 0;font-size:12.5px;color:var(--body);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;}
+.note b{color:var(--ink);}
+
+.frm{font-family:'Inter',sans-serif;width:100%;max-width:860px;margin:0 auto;border:1px solid var(--border-strong);border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:0 4px 16px rgba(20,24,29,0.08);}
+.chr{height:34px;background:var(--chrome);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 12px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border-strong);}
+.url{margin-left:8px;font-size:11px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:5px;padding:2px 10px;}
+.cnt{height:520px;overflow-y:auto;background:var(--bg);}
+
+.cnt input,.cnt textarea,.cnt select{font-family:'Inter',sans-serif;}
+@media (max-width:980px){
+  .sidebar{position:relative;height:auto;width:100%;flex:none;}
+  .app{flex-direction:column;}
+  .main{padding:20px 14px 50px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+    <div class="topbar">
+      <div class="crumb" id="crumb">PUBLIC WEBSITE</div>
+      <div class="stitle" id="stitle">Home Page</div>
+    </div>
+    <div class="frm">
+      <div class="chr"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url" id="urlbar">kuric.ku.ac.bd/</span></div>
+      <div class="cnt" id="cnt"></div>
+    </div>
+    <div class="note" id="note"></div>
+  </main>
+</div>
+
+<script>
+const screens = [];
+function add(o){ screens.push(o); }
+const navTop = `<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:#fff;">
+<div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:7px;background:var(--teal);"></div><span style="font-family:'Fraunces',serif;font-weight:700;font-size:16px;color:var(--ink);">KURIC</span></div>
+<div style="display:flex;gap:22px;font-size:13px;color:var(--body);font-weight:500;"><span>Home</span><span>About</span><span>Research</span><span>Publications</span><span>Events</span><span>Contact</span></div>
+<button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:12.5px;font-weight:600;">Submit proposal</button>
+</div>`;
+function navSimple(){
+  return `<div style="display:flex;align-items:center;gap:10px;padding:16px 28px;border-bottom:1px solid var(--border);background:#fff;"><div style="width:26px;height:26px;border-radius:6px;background:var(--teal);"></div><span style="font-family:'Fraunces',serif;font-weight:700;font-size:15px;">KURIC</span></div>`;
+}
+function sidenav(items, activeIdx){
+  return `<div style="width:160px;background:#fff;border-right:1px solid var(--border);padding:20px 0;flex-shrink:0;">
+  <div style="padding:0 18px 16px;"><div style="width:26px;height:26px;border-radius:6px;background:var(--teal);"></div></div>
+  ${items.map((t,i)=>`<div style="padding:9px 18px;font-size:12.5px;${i===activeIdx?'background:var(--teal-tint);border-left:3px solid var(--teal);color:var(--teal-dark);font-weight:700;':'color:var(--body);font-weight:500;'}">${t}</div>`).join('')}
+  </div>`;
+}
+
+/* ---------------- PUBLIC ---------------- */
+add({role:'Public / Visitor', crumb:'PUBLIC WEBSITE', title:'Home Page', url:'kuric.ku.ac.bd/', note:'Landing page for all visitors — hero, stats, and latest news funnel into Research, Publications and Contact.',
+render(){return `${navTop}
+<div style="padding:52px 40px 44px;text-align:center;background:radial-gradient(ellipse at 50% -10%, #DCEEE9 0%, #FAF8F3 60%);">
+<div style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:14px;">Khulna University</div>
+<div style="font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:var(--body);line-height:1.2;margin-bottom:4px;">Research and Innovation Center</div>
+<div style="font-family:'Fraunces',serif;font-size:42px;font-weight:700;color:var(--teal-dark);line-height:1.15;max-width:600px;margin:0 auto 16px;">Where proposals become projects.</div>
+<p style="font-size:14.5px;color:var(--body);max-width:420px;margin:0 auto 24px;line-height:1.6;">Submit, review, and track research at Khulna University — all in one place.</p>
+<div style="display:flex;gap:12px;justify-content:center;">
+<button style="background:var(--teal);color:#fff;border:none;border-radius:8px;padding:12px 22px;font-size:13.5px;font-weight:600;">Submit a proposal</button>
+<button style="background:#fff;color:var(--ink);border:1.5px solid var(--border-strong);border-radius:8px;padding:12px 22px;font-size:13.5px;font-weight:600;">Explore research</button>
+</div></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);">
+<div style="background:#fff;padding:24px 20px;text-align:center;"><div style="font-family:'Fraunces',serif;font-size:28px;font-weight:700;color:var(--teal-dark);">128</div><div style="font-size:12.5px;color:var(--body);font-weight:500;margin-top:2px;">Active projects</div></div>
+<div style="background:#fff;padding:24px 20px;text-align:center;"><div style="font-family:'Fraunces',serif;font-size:28px;font-weight:700;color:var(--teal-dark);">340</div><div style="font-size:12.5px;color:var(--body);font-weight:500;margin-top:2px;">Publications</div></div>
+<div style="background:#fff;padding:24px 20px;text-align:center;"><div style="font-family:'Fraunces',serif;font-size:28px;font-weight:700;color:var(--gold-dark);">৳4.2Cr</div><div style="font-size:12.5px;color:var(--body);font-weight:500;margin-top:2px;">Funded to date</div></div>
+</div>
+<div style="padding:32px 40px 40px;">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;"><div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--ink);">Latest from the center</div><span style="font-size:12.5px;color:var(--teal-dark);font-weight:600;">View all →</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:10px;padding:15px;"><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-dark);font-weight:700;margin-bottom:8px;">Event</div><div style="font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.4;margin-bottom:6px;">Annual research symposium announced</div><div style="font-size:12px;color:var(--muted);font-weight:500;">14 Sep 2026</div></div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:10px;padding:15px;"><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-dark);font-weight:700;margin-bottom:8px;">Funding</div><div style="font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.4;margin-bottom:6px;">Grant call opens for AI research</div><div style="font-size:12px;color:var(--muted);font-weight:500;">10 Aug 2026</div></div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid #6B7280;border-radius:10px;padding:15px;"><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#4B5563;font-weight:700;margin-bottom:8px;">Publication</div><div style="font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.4;margin-bottom:6px;">New study on coastal water quality</div><div style="font-size:12px;color:var(--muted);font-weight:500;">3 Aug 2026</div></div>
+</div></div>
+<div style="padding:16px 40px;background:#12211D;color:#D8E6E1;font-size:12.5px;display:flex;justify-content:space-between;"><span>© Khulna University Research and Innovation Center</span><span style="display:flex;gap:16px;"><span>About</span><span>Contact</span><span>Publications</span></span></div>`;}});
+
+add({role:'Public / Visitor', crumb:'PUBLIC WEBSITE', title:'About Page', url:'kuric.ku.ac.bd/about', note:'History, mission and leadership build trust before a researcher decides to submit a proposal.',
+render(){return `${navSimple()}
+<div style="padding:34px 40px;">
+<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px;">About us</div>
+<div style="font-family:'Fraunces',serif;font-size:28px;font-weight:700;margin:0 0 16px;color:var(--teal-dark);">Our mission at KURIC</div>
+<p style="font-size:14px;color:var(--body);line-height:1.75;max-width:600px;margin-bottom:26px;">We advance research culture at Khulna University by supporting proposal development, funding pathways, and interdisciplinary collaboration across departments.</p>
+<div style="display:flex;gap:18px;align-items:center;background:#fff;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:12px;padding:16px 18px;margin-bottom:24px;max-width:480px;">
+<div style="width:60px;height:60px;border-radius:50%;background:var(--teal-tint);flex-shrink:0;"></div>
+<div><div style="font-weight:700;font-size:14.5px;color:var(--ink);">Dr. Kazi Masudul Alam</div><div style="font-size:12.5px;color:var(--muted);font-weight:500;margin-top:2px;">Director, KURIC</div></div></div>
+<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px;">Organizational structure</div>
+<div style="height:90px;background:#fff;border:1.5px dashed var(--border-strong);border-radius:12px;"></div></div>`;}});
+
+add({role:'Public / Visitor', crumb:'PUBLIC WEBSITE', title:'Research Areas Page', url:'kuric.ku.ac.bd/research', note:'Grid + category filter on top; clicking a card opens the detail view (objective, team, status, funding).',
+render(){return `${navSimple()}
+<div style="padding:26px 32px;">
+<div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin:0 0 16px;color:var(--ink);">Research areas</div>
+<div style="display:flex;gap:8px;margin-bottom:18px;">
+<span style="background:var(--teal);color:#fff;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;">All</span>
+<span style="border:1.5px solid var(--border-strong);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--body);font-weight:500;">ICT</span>
+<span style="border:1.5px solid var(--border-strong);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--body);font-weight:500;">Environment</span>
+<span style="border:1.5px solid var(--border-strong);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--body);font-weight:500;">Health</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:10px;padding:16px;"><div style="font-weight:700;font-size:14px;margin-bottom:8px;color:var(--ink);">AI in agriculture</div><span style="background:var(--teal-tint);color:var(--teal-dark);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Ongoing</span></div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:10px;padding:16px;"><div style="font-weight:700;font-size:14px;margin-bottom:8px;color:var(--ink);">Coastal water quality</div><span style="background:var(--gold-tint);color:var(--gold-dark);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Funded</span></div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid #6B7280;border-radius:10px;padding:16px;"><div style="font-weight:700;font-size:14px;margin-bottom:8px;color:var(--ink);">Rural health access</div><span style="background:#E5E5E0;color:var(--body);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Completed</span></div>
+</div></div>`;}});
+
+add({role:'Public / Visitor', crumb:'PUBLIC WEBSITE', title:'Publications Page', url:'kuric.ku.ac.bd/publications', note:'Searchable, citable list — visitors often arrive here directly from search engines.',
+render(){return `${navSimple()}
+<div style="padding:26px 32px;">
+<div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin:0 0 16px;color:var(--ink);">Publications</div>
+<div style="display:flex;gap:8px;margin-bottom:16px;">
+<select style="height:34px;border:1.5px solid var(--border-strong);border-radius:7px;font-size:12.5px;padding:0 10px;background:#fff;color:var(--ink);"><option>Year</option></select>
+<select style="height:34px;border:1.5px solid var(--border-strong);border-radius:7px;font-size:12.5px;padding:0 10px;background:#fff;color:var(--ink);"><option>Author</option></select>
+<input placeholder="Search publications" style="height:34px;border:1.5px solid var(--border-strong);border-radius:7px;font-size:12.5px;padding:0 12px;flex:1;background:#fff;"/></div>
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+<div style="display:grid;grid-template-columns:2fr 1fr 0.6fr 0.5fr;padding:10px 16px;font-size:11.5px;color:var(--muted);font-weight:700;background:var(--chrome);"><span>Title</span><span>Author(s)</span><span>Year</span><span></span></div>
+<div style="display:grid;grid-template-columns:2fr 1fr 0.6fr 0.5fr;padding:13px 16px;font-size:13px;font-weight:500;color:var(--ink);border-top:1px solid var(--border);align-items:center;"><span>Groundwater contamination patterns</span><span style="color:var(--body);">Rahman et al.</span><span style="color:var(--body);">2025</span><span style="color:var(--teal-dark);font-weight:700;">↓ PDF</span></div>
+<div style="display:grid;grid-template-columns:2fr 1fr 0.6fr 0.5fr;padding:13px 16px;font-size:13px;font-weight:500;color:var(--ink);border-top:1px solid var(--border);align-items:center;"><span>Machine learning for crop yield</span><span style="color:var(--body);">Tamanna, S.</span><span style="color:var(--body);">2024</span><span style="color:var(--teal-dark);font-weight:700;">↓ PDF</span></div>
+</div></div>`;}});
+
+add({role:'Public / Visitor', crumb:'PUBLIC WEBSITE', title:'Events / News Page', url:'kuric.ku.ac.bd/events', note:'Tabs combine forward-looking events with the backward-looking news archive.',
+render(){return `${navSimple()}
+<div style="padding:26px 32px;">
+<div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin:0 0 16px;color:var(--ink);">Events &amp; news</div>
+<div style="display:flex;gap:8px;margin-bottom:18px;">
+<span style="background:var(--teal);color:#fff;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;">Upcoming</span>
+<span style="border:1.5px solid var(--border-strong);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--body);font-weight:500;">Past events</span>
+<span style="border:1.5px solid var(--border-strong);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--body);font-weight:500;">News</span></div>
+<div style="display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+<div style="text-align:center;width:46px;flex-shrink:0;"><div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--teal-dark);">14</div><div style="font-size:10px;color:var(--muted);font-weight:700;">SEP</div></div>
+<div><div style="font-weight:700;font-size:13.5px;color:var(--ink);">Annual research symposium</div><div style="font-size:12px;color:var(--muted);font-weight:500;">KU Auditorium</div></div></div>
+<div style="display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:10px;padding:14px 16px;">
+<div style="text-align:center;width:46px;flex-shrink:0;"><div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--teal-dark);">28</div><div style="font-size:10px;color:var(--muted);font-weight:700;">SEP</div></div>
+<div><div style="font-weight:700;font-size:13.5px;color:var(--ink);">Workshop on grant writing</div><div style="font-size:12px;color:var(--muted);font-weight:500;">Seminar Room 2</div></div></div>
+</div>`;}});
+
+add({role:'Public / Visitor', crumb:'PUBLIC WEBSITE', title:'Contact Page', url:'kuric.ku.ac.bd/contact', note:'Low-friction way for external partners/press to reach KURIC without needing an account.',
+render(){return `${navSimple()}
+<div style="display:grid;grid-template-columns:1fr 1fr;">
+<div style="padding:30px 32px;">
+<div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700;margin:0 0 16px;color:var(--ink);">Get in touch</div>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Name</div><input style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:12px;box-sizing:border-box;"/>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Email</div><input style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:12px;box-sizing:border-box;"/>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Message</div><textarea style="width:100%;height:64px;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:14px;box-sizing:border-box;"></textarea>
+<button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:10px 18px;font-size:13px;font-weight:600;">Send message</button></div>
+<div style="padding:30px 32px;background:var(--teal-tint);">
+<div style="height:110px;background:#fff;border-radius:10px;margin-bottom:16px;border:1px solid var(--border);"></div>
+<div style="font-size:13px;color:var(--ink);font-weight:500;line-height:1.9;">Khulna University, Khulna 9208<br/>kuric@ku.ac.bd<br/>+880 41-xxxxxx</div></div>
+</div>`;}});
+
+add({role:'Public / Visitor', crumb:'PUBLIC WEBSITE — AI FEATURE', title:'AI Chatbot Widget', url:'kuric.ku.ac.bd/ (any page)', note:'Floating widget layered on every public page — RAG over site content, answered via Claude API.',
+render(){return `${navSimple()}
+<div style="position:relative;height:440px;">
+<div style="position:absolute;right:20px;bottom:76px;width:250px;border:1px solid var(--border);border-radius:12px;background:#fff;overflow:hidden;box-shadow:0 8px 24px rgba(14,110,92,0.2);">
+<div style="background:var(--teal);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;">KURIC Assistant <span>✕</span></div>
+<div style="padding:12px;font-size:12.5px;">
+<div style="background:var(--chrome);color:var(--ink);border-radius:10px;padding:7px 11px;margin-bottom:8px;max-width:80%;font-weight:500;">How do I submit a proposal?</div>
+<div style="background:var(--teal-tint);color:var(--teal-dark);border-radius:10px;padding:7px 11px;max-width:88%;margin-left:auto;font-weight:500;">Register as a researcher, then use "New proposal" from your dashboard.</div></div>
+<div style="padding:0 12px 10px;"><span style="border:1.5px solid var(--border-strong);border-radius:20px;padding:4px 9px;font-size:11px;color:var(--body);font-weight:500;">Research areas?</span></div>
+<div style="display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--border);"><input style="flex:1;height:30px;border:1.5px solid var(--border-strong);border-radius:6px;font-size:12px;padding:0 8px;"/><button style="background:var(--teal);color:#fff;border:none;border-radius:6px;padding:0 12px;font-size:12px;font-weight:600;">Send</button></div>
+</div>
+<div style="position:absolute;right:20px;bottom:20px;width:48px;height:48px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(14,110,92,0.4);">💬</div>
+</div>`;}});
+
+/* ---------------- RESEARCHER ---------------- */
+add({role:'Researcher', crumb:'RESEARCHER PORTAL', title:'Register Page', url:'kuric.ku.ac.bd/register', note:'Gate before any submission work — kept short (4 fields) to reduce drop-off.',
+render(){return `<div style="height:520px;background:var(--teal-tint);display:flex;align-items:center;justify-content:center;">
+<div style="width:340px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:28px;">
+<div style="width:36px;height:36px;border-radius:9px;background:var(--teal);margin:0 auto 14px;"></div>
+<div style="font-family:'Fraunces',serif;font-weight:700;font-size:18px;text-align:center;margin-bottom:20px;color:var(--ink);">Create your account</div>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Full name</div><input style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:12px;box-sizing:border-box;"/>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">University email</div><input placeholder="name@ku.ac.bd" style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:12px;box-sizing:border-box;"/>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Password</div><input type="password" style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:12px;box-sizing:border-box;"/>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Department / designation</div>
+<select style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:18px;box-sizing:border-box;"><option>Teacher</option><option>Student</option></select>
+<button style="width:100%;background:var(--teal);color:#fff;border:none;border-radius:7px;padding:11px;font-size:13.5px;font-weight:600;">Create account</button>
+<div style="text-align:center;font-size:12px;color:var(--muted);font-weight:500;margin-top:12px;">Already have an account? <span style="color:var(--teal-dark);font-weight:700;">Log in</span></div></div></div>`;}});
+
+add({role:'Researcher', crumb:'RESEARCHER PORTAL', title:'Login Page', url:'kuric.ku.ac.bd/login', note:'Shared visual pattern with Register; the same layout serves Reviewer and Officer logins too.',
+render(){return `<div style="height:520px;background:var(--teal-tint);display:flex;align-items:center;justify-content:center;">
+<div style="width:300px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:28px;">
+<div style="width:36px;height:36px;border-radius:9px;background:var(--teal);margin:0 auto 14px;"></div>
+<div style="font-family:'Fraunces',serif;font-weight:700;font-size:18px;text-align:center;margin-bottom:20px;color:var(--ink);">Log in to KURIC</div>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Email</div><input style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:12px;box-sizing:border-box;"/>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Password</div><input type="password" style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:8px;box-sizing:border-box;"/>
+<div style="text-align:right;font-size:12px;color:var(--teal-dark);font-weight:600;margin-bottom:18px;">Forgot password?</div>
+<button style="width:100%;background:var(--teal);color:#fff;border:none;border-radius:7px;padding:11px;font-size:13.5px;font-weight:600;">Log in</button>
+<div style="text-align:center;font-size:12px;color:var(--muted);font-weight:500;margin-top:12px;">New here? <span style="color:var(--teal-dark);font-weight:700;">Create an account</span></div></div></div>`;}});
+
+add({role:'Researcher', crumb:'RESEARCHER PORTAL', title:'Proposal Submission Form', url:'kuric.ku.ac.bd/proposals/new', note:'The core MVP screen — everything else in the researcher flow exists to feed or reflect this form.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(['Dashboard','New proposal','Profile'],1)}
+<div style="flex:1;padding:22px 26px;overflow-y:auto;">
+<div style="font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin:0 0 16px;color:var(--ink);">New proposal</div>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Proposal title</div><input style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:14px;box-sizing:border-box;"/>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Abstract / summary</div><textarea style="width:100%;height:52px;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:14px;box-sizing:border-box;"></textarea>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+<div><div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Budget (BDT)</div><input style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;box-sizing:border-box;"/></div>
+<div><div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Duration</div><input placeholder="12 months" style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;box-sizing:border-box;"/></div></div>
+<div style="font-size:12.5px;color:var(--teal-dark);font-weight:700;margin-bottom:14px;">+ Add co-researcher</div>
+<div style="border:1.5px dashed var(--gold);background:var(--gold-tint);border-radius:10px;padding:16px;text-align:center;font-size:12.5px;color:var(--gold-dark);font-weight:600;margin-bottom:18px;">⬆ Drag files here or browse (PDF, DOC)</div>
+<div style="display:flex;gap:10px;">
+<button style="background:#fff;border:1.5px solid var(--border-strong);color:var(--ink);border-radius:7px;padding:10px 18px;font-size:13px;font-weight:600;">Save as draft</button>
+<button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:10px 18px;font-size:13px;font-weight:600;">Submit proposal</button></div></div></div>`;}});
+
+add({role:'Researcher', crumb:'RESEARCHER PORTAL', title:'Proposal Status Dashboard', url:'kuric.ku.ac.bd/proposals', note:'Home base for a returning researcher — answers "where do things stand?" at a glance.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(['Dashboard','New proposal','Profile'],0)}
+<div style="flex:1;padding:22px 26px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-family:'Fraunces',serif;font-size:19px;font-weight:700;color:var(--ink);">My proposals</div><select style="height:32px;border:1.5px solid var(--border-strong);border-radius:7px;font-size:12px;padding:0 10px;background:#fff;color:var(--ink);"><option>All statuses</option></select></div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13.5px;font-weight:700;color:var(--ink);">AI in agriculture yield prediction</span><span style="background:var(--gold-tint);color:var(--gold-dark);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;">Under review</span></div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13.5px;font-weight:700;color:var(--ink);">Coastal water quality mapping</span><span style="background:var(--teal-tint);color:var(--teal-dark);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;">Accepted</span></div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--danger);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13.5px;font-weight:700;color:var(--ink);">Low-cost sensor network</span><span style="background:var(--danger-tint);color:var(--danger-dark);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;">Revision needed</span></div>
+</div></div>`;}});
+
+add({role:'Researcher', crumb:'RESEARCHER PORTAL', title:'Proposal Detail Page', url:'kuric.ku.ac.bd/proposals/42', note:'Combines status tracking, feedback, resubmission and appeal into one detail view.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(['Dashboard','New proposal','Profile'],0)}
+<div style="flex:1;display:grid;grid-template-columns:2fr 1fr;">
+<div style="padding:24px 26px;border-right:1px solid var(--border);"><div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin:0 0 12px;color:var(--ink);">Low-cost sensor network for flood monitoring</div><p style="font-size:13px;color:var(--body);line-height:1.7;">Abstract, objectives, budget, and attached files appear here in full detail for the researcher to review.</p></div>
+<div style="padding:24px 22px;"><span style="background:var(--danger-tint);color:var(--danger-dark);font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px;">Revision needed</span>
+<div style="font-size:11.5px;color:var(--muted);font-weight:700;margin:16px 0 6px;text-transform:uppercase;letter-spacing:.06em;">Reviewer feedback</div>
+<div style="font-size:12.5px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:16px;">Please clarify budget for sensor hardware.</div>
+<div style="font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Version history</div>
+<div style="font-size:12.5px;margin-bottom:18px;color:var(--body);font-weight:500;">v1 — submitted &nbsp;·&nbsp; v2 — current draft</div>
+<button style="width:100%;background:var(--teal);color:#fff;border:none;border-radius:7px;padding:10px;font-size:13px;font-weight:700;margin-bottom:8px;">Resubmit</button>
+<button style="width:100%;background:#fff;border:1.5px solid var(--border-strong);color:var(--ink);border-radius:7px;padding:10px;font-size:13px;font-weight:600;">Submit appeal</button></div></div></div>`;}});
+
+add({role:'Researcher', crumb:'RESEARCHER PORTAL', title:'Profile Page', url:'kuric.ku.ac.bd/profile', note:'Low-priority enhancement — basic self-service profile editing.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(['Dashboard','New proposal','Profile'],2)}
+<div style="flex:1;padding:24px 28px;display:grid;grid-template-columns:1fr 2fr;gap:20px;">
+<div style="text-align:center;"><div style="width:80px;height:80px;border-radius:50%;background:var(--teal-tint);margin:0 auto 8px;"></div><div style="font-size:12px;color:var(--teal-dark);font-weight:700;">Change photo</div></div>
+<div><div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Bio</div><textarea style="width:100%;height:52px;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:14px;box-sizing:border-box;"></textarea>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Contact information</div><input style="width:100%;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:14px;box-sizing:border-box;"/>
+<button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:13px;font-weight:600;">Save changes</button></div></div></div>`;}});
+
+/* ---------------- REVIEWER ---------------- */
+add({role:'Reviewer', crumb:'REVIEWER PORTAL', title:'Assigned Proposals Dashboard', url:'kuric.ku.ac.bd/reviewer/proposals', note:'Privacy-scoped list — a reviewer only ever sees proposals assigned to them.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(['Assigned to me'],0)}
+<div style="flex:1;padding:24px 28px;">
+<div style="font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin:0 0 16px;color:var(--ink);">Assigned to me</div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13.5px;font-weight:700;color:var(--ink);">AI in agriculture yield prediction</span><span style="background:var(--gold-tint);color:var(--gold-dark);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;">Pending review</span></div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13.5px;font-weight:700;color:var(--ink);">Rural telemedicine platform</span><span style="background:var(--gold-tint);color:var(--gold-dark);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;">Pending review</span></div>
+</div></div>`;}});
+
+add({role:'Reviewer', crumb:'REVIEWER PORTAL — AI FEATURE', title:'Proposal Review Detail Page', url:'kuric.ku.ac.bd/reviewer/proposals/17', note:'AI summary sits above a "Full proposal" panel with a View button and downloadable attachments — the reviewer can always check the source before deciding.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(['Assigned to me'],0)}
+<div style="flex:1;padding:22px 26px;overflow-y:auto;">
+<div style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin:0 0 14px;color:var(--ink);">Rural telemedicine platform — review</div>
+<div style="background:var(--teal-tint);border:1.5px solid var(--teal-tint-b);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+<div style="font-size:10.5px;font-weight:800;color:var(--teal-dark);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;">✦ AI-generated summary</div>
+<div style="font-size:13px;line-height:1.65;color:var(--ink);font-weight:500;">Proposes a low-cost telemedicine kiosk network for three upazilas, aiming to cut patient travel time by 60% within 18 months.</div></div>
+
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Full proposal</div>
+<button style="background:var(--teal);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;">View full proposal</button>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+<div style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--ink);font-weight:500;">📄 Proposal.pdf <span style="color:var(--teal-dark);font-weight:700;margin-left:4px;">↓</span></div>
+<div style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--ink);font-weight:500;">📎 Budget_breakdown.xlsx <span style="color:var(--teal-dark);font-weight:700;margin-left:4px;">↓</span></div>
+</div>
+</div>
+<div style="display:flex;gap:8px;margin-bottom:12px;">
+<button style="background:var(--teal-tint);color:var(--teal-dark);border:1.5px solid var(--teal-tint-b);border-radius:7px;padding:8px 16px;font-size:12.5px;font-weight:700;">Accept</button>
+<button style="background:var(--gold-tint);color:var(--gold-dark);border:1.5px solid var(--gold-tint-b);border-radius:7px;padding:8px 16px;font-size:12.5px;font-weight:700;">Revision needed</button>
+<button style="background:var(--danger-tint);color:var(--danger-dark);border:1.5px solid var(--danger-tint-b);border-radius:7px;padding:8px 16px;font-size:12.5px;font-weight:700;">Deny</button></div>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:6px;">Comment (required)</div><textarea style="width:100%;height:44px;border:1.5px solid var(--border-strong);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:12px;box-sizing:border-box;"></textarea>
+<button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:13px;font-weight:700;">Submit decision</button></div></div>`;}});
+
+/* ---------------- OFFICER ---------------- */
+const officerNav = ['Dashboard','Assign reviewer','Events','News','Publications','Appeals','Users','Reports'];
+
+add({role:'KURIC Officer (Admin)', crumb:'OFFICER PORTAL', title:'Admin Dashboard', url:'kuric.ku.ac.bd/admin', note:"Officer's landing page — quick pulse-check on the whole proposal pipeline.",
+render(){return `<div style="display:flex;height:520px;">${sidenav(officerNav,0)}
+<div style="flex:1;padding:24px 28px;">
+<div style="font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin:0 0 18px;color:var(--ink);">Admin dashboard</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;"><div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--body);">34</div><div style="font-size:11.5px;color:var(--muted);font-weight:600;">Pending</div></div>
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;"><div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--gold-dark);">18</div><div style="font-size:11.5px;color:var(--muted);font-weight:600;">Under review</div></div>
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;"><div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--teal-dark);">52</div><div style="font-size:11.5px;color:var(--muted);font-weight:600;">Accepted</div></div>
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;"><div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--danger-dark);">9</div><div style="font-size:11.5px;color:var(--muted);font-weight:600;">Rejected</div></div>
+</div><div style="font-size:12.5px;color:var(--body);font-weight:500;">Recent activity feed lists the latest submissions, decisions, and appeals here.</div></div></div>`;}});
+
+add({role:'KURIC Officer (Admin)', crumb:'OFFICER PORTAL — AI FEATURE', title:'Reviewer Assignment Page', url:'kuric.ku.ac.bd/admin/assign/12', note:'AI suggestions sit above the manual dropdown — the officer always makes the final call.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(officerNav,1)}
+<div style="flex:1;padding:24px 28px;">
+<div style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin:0 0 4px;color:var(--ink);">Assign reviewer</div>
+<div style="font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:16px;">AI in agriculture yield prediction</div>
+<div style="font-size:10.5px;font-weight:800;color:var(--teal-dark);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">✦ AI suggested reviewers</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;">
+<div style="border:2px solid var(--teal);background:var(--teal-tint);border-radius:10px;padding:14px;text-align:center;"><div style="font-family:'Fraunces',serif;font-weight:700;font-size:17px;color:var(--teal-dark);">92%</div><div style="font-size:12.5px;font-weight:700;color:var(--ink);margin:4px 0;">Dr. Nasrin</div><div style="font-size:11px;color:var(--body);font-weight:500;">Expertise in AI and ICT</div></div>
+<div style="border:1px solid var(--border);background:#fff;border-radius:10px;padding:14px;text-align:center;"><div style="font-family:'Fraunces',serif;font-weight:700;font-size:17px;color:var(--ink);">78%</div><div style="font-size:12.5px;font-weight:700;color:var(--ink);margin:4px 0;">Dr. Karim</div><div style="font-size:11px;color:var(--muted);font-weight:500;">Data science background</div></div>
+<div style="border:1px solid var(--border);background:#fff;border-radius:10px;padding:14px;text-align:center;"><div style="font-family:'Fraunces',serif;font-weight:700;font-size:17px;color:var(--ink);">65%</div><div style="font-size:12.5px;font-weight:700;color:var(--ink);margin:4px 0;">Dr. Farid</div><div style="font-size:11px;color:var(--muted);font-weight:500;">Agricultural systems</div></div></div>
+<div style="display:flex;gap:10px;"><select style="flex:1;height:36px;border:1.5px solid var(--border-strong);border-radius:7px;font-size:12.5px;padding:0 10px;background:#fff;color:var(--ink);"><option>Or choose manually</option></select><button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:0 20px;font-size:12.5px;font-weight:700;">Assign</button></div></div></div>`;}});
+
+add({role:'KURIC Officer (Admin)', crumb:'OFFICER PORTAL — CMS', title:'Events CRUD Page', url:'kuric.ku.ac.bd/admin/events', note:'Standard list + modal pattern, reused (with different fields) for News and Publications.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(officerNav,2)}
+<div style="flex:1;padding:24px 28px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--ink);">Manage events</div><button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12.5px;font-weight:700;">+ Add event</button></div>
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr 0.6fr;padding:10px 16px;font-size:11.5px;color:var(--muted);font-weight:700;background:var(--chrome);"><span>Title</span><span>Date</span><span>Venue</span><span></span></div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr 0.6fr;padding:13px 16px;font-size:13px;font-weight:500;color:var(--ink);border-top:1px solid var(--border);align-items:center;"><span>Annual research symposium</span><span style="color:var(--body);">14 Sep 2026</span><span style="color:var(--body);">KU Auditorium</span><span style="color:var(--teal-dark);font-weight:700;">Edit</span></div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr 0.6fr;padding:13px 16px;font-size:13px;font-weight:500;color:var(--ink);border-top:1px solid var(--border);align-items:center;"><span>Grant writing workshop</span><span style="color:var(--body);">28 Sep 2026</span><span style="color:var(--body);">Seminar Room 2</span><span style="color:var(--teal-dark);font-weight:700;">Edit</span></div>
+</div></div></div>`;}});
+
+add({role:'KURIC Officer (Admin)', crumb:'OFFICER PORTAL — CMS', title:'News CRUD Page', url:'kuric.ku.ac.bd/admin/news', note:'Add/Edit form includes a rich text editor for the content field.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(officerNav,3)}
+<div style="flex:1;padding:24px 28px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--ink);">Manage news</div><button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12.5px;font-weight:700;">+ Add news</button></div>
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;">
+<div style="display:grid;grid-template-columns:2fr 1fr 0.6fr;padding:10px 16px;font-size:11.5px;color:var(--muted);font-weight:700;background:var(--chrome);"><span>Title</span><span>Published</span><span></span></div>
+<div style="display:grid;grid-template-columns:2fr 1fr 0.6fr;padding:13px 16px;font-size:13px;font-weight:500;color:var(--ink);border-top:1px solid var(--border);align-items:center;"><span>Grant call opens for AI research</span><span style="color:var(--body);">10 Aug 2026</span><span style="color:var(--teal-dark);font-weight:700;">Edit</span></div></div>
+<div style="border:1.5px dashed var(--gold);background:var(--gold-tint);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--gold-dark);font-weight:600;">Add/edit form includes a rich text editor (bold, italic, links, lists, headings, inline images) plus a thumbnail upload.</div></div></div>`;}});
+
+add({role:'KURIC Officer (Admin)', crumb:'OFFICER PORTAL — CMS', title:'Publications CRUD Page', url:'kuric.ku.ac.bd/admin/publications', note:'Mirrors the public Publications page but with admin controls layered on top.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(officerNav,4)}
+<div style="flex:1;padding:24px 28px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--ink);">Manage publications</div><button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12.5px;font-weight:700;">+ Add publication</button></div>
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+<div style="display:grid;grid-template-columns:2fr 1fr 0.6fr 0.5fr;padding:10px 16px;font-size:11.5px;color:var(--muted);font-weight:700;background:var(--chrome);"><span>Title</span><span>Author(s)</span><span>Year</span><span></span></div>
+<div style="display:grid;grid-template-columns:2fr 1fr 0.6fr 0.5fr;padding:13px 16px;font-size:13px;font-weight:500;color:var(--ink);border-top:1px solid var(--border);align-items:center;"><span>Groundwater contamination patterns</span><span style="color:var(--body);">Rahman et al.</span><span style="color:var(--body);">2025</span><span style="color:var(--teal-dark);font-weight:700;">Edit</span></div>
+</div></div></div>`;}});
+
+add({role:'KURIC Officer (Admin)', crumb:'OFFICER PORTAL', title:'Appeal Resolution Page', url:'kuric.ku.ac.bd/admin/appeals/5', note:"Side-by-side comparison lets the officer weigh the appeal against the original reviewer decision.",
+render(){return `<div style="display:flex;height:520px;">${sidenav(officerNav,5)}
+<div style="flex:1;padding:22px 26px;">
+<div style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin:0 0 16px;color:var(--ink);">Appeal — Low-cost sensor network</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Researcher's appeal</div><div style="font-size:13px;color:var(--ink);font-weight:500;line-height:1.6;">The budget concern was addressed in the resubmitted version; requesting reconsideration.</div></div>
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Original reviewer comment</div><div style="font-size:13px;color:var(--ink);font-weight:500;line-height:1.6;">Budget breakdown was incomplete for sensor hardware costs.</div></div></div>
+<div style="display:flex;gap:10px;"><button style="background:#fff;border:1.5px solid var(--border-strong);color:var(--ink);border-radius:7px;padding:10px 18px;font-size:13px;font-weight:600;">Uphold rejection</button><button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:10px 18px;font-size:13px;font-weight:700;">Override decision</button></div></div></div>`;}});
+
+add({role:'KURIC Officer (Admin)', crumb:'OFFICER PORTAL', title:'User & Account Management Page', url:'kuric.ku.ac.bd/admin/users', note:'Central place to grant/revoke the Reviewer role, deactivate accounts, and reset passwords.',
+render(){return `<div style="display:flex;height:520px;">${sidenav(officerNav,6)}
+<div style="flex:1;padding:24px 28px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--ink);">Users</div><select style="height:32px;border:1.5px solid var(--border-strong);border-radius:7px;font-size:12px;padding:0 10px;background:#fff;color:var(--ink);"><option>Role: all</option></select></div>
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+<div style="display:grid;grid-template-columns:1.3fr 1.6fr 1fr 0.8fr 0.4fr;padding:10px 16px;font-size:11.5px;color:var(--muted);font-weight:700;background:var(--chrome);"><span>Name</span><span>Email</span><span>Role</span><span>Status</span><span></span></div>
+<div style="display:grid;grid-template-columns:1.3fr 1.6fr 1fr 0.8fr 0.4fr;padding:12px 16px;font-size:13px;font-weight:500;color:var(--ink);border-top:1px solid var(--border);align-items:center;"><span>Hadidur Jion</span><span style="color:var(--body);">jion@ku.ac.bd</span><span style="color:var(--body);">Researcher</span><span style="background:var(--teal-tint);color:var(--teal-dark);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;">Active</span><span style="color:var(--teal-dark);font-weight:700;">⋯</span></div>
+<div style="display:grid;grid-template-columns:1.3fr 1.6fr 1fr 0.8fr 0.4fr;padding:12px 16px;font-size:13px;font-weight:500;color:var(--ink);border-top:1px solid var(--border);align-items:center;"><span>Dr. Nasrin</span><span style="color:var(--body);">nasrin@ku.ac.bd</span><span style="color:var(--body);">Reviewer</span><span style="background:var(--teal-tint);color:var(--teal-dark);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;">Active</span><span style="color:var(--teal-dark);font-weight:700;">⋯</span></div>
+</div></div></div>`;}});
+
+add({role:'KURIC Officer (Admin)', crumb:'OFFICER PORTAL — AI FEATURE', title:'Reports Page', url:'kuric.ku.ac.bd/admin/reports', note:"AI compiles raw counts into a narrative so the officer doesn't manually write the report.",
+render(){return `<div style="display:flex;height:520px;">${sidenav(officerNav,7)}
+<div style="flex:1;padding:24px 28px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;"><div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--ink);">Reports</div><div style="display:flex;gap:8px;"><select style="height:34px;border:1.5px solid var(--border-strong);border-radius:7px;font-size:12px;padding:0 10px;background:#fff;color:var(--ink);"><option>This month</option></select><button style="background:var(--teal);color:#fff;border:none;border-radius:7px;padding:0 16px;font-size:12.5px;font-weight:700;">Generate AI report</button></div></div>
+<div style="background:var(--teal-tint);border:1.5px solid var(--teal-tint-b);border-radius:10px;padding:16px;margin-bottom:14px;">
+<div style="font-size:10.5px;font-weight:800;color:var(--teal-dark);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">✦ AI-generated report</div>
+<div style="font-size:13px;line-height:1.7;color:var(--ink);font-weight:500;">Proposal submissions rose 18% this month, driven largely by the ICT department. Environment-related proposals increased 30%, while acceptance rate held steady at 62% across all departments.</div></div>
+<button style="background:#fff;border:1.5px solid var(--border-strong);color:var(--ink);border-radius:7px;padding:9px 18px;font-size:13px;font-weight:600;">Download as PDF</button></div></div>`;}});
+
+/* ============ APP ============ */
+const sidebarEl = document.getElementById('sidebar');
+const roles = [];
+screens.forEach(s=>{ if(!roles.includes(s.role)) roles.push(s.role); });
+
+function buildSidebar(){
+  let html = `<div class="brand"><div class="mark"></div><div><h1>KURIC Web Portal</h1><p>23 UI Screens · v4</p></div></div>`;
+  let gi = 0;
+  roles.forEach(role=>{
+    html += `<div class="role-group"><div class="role-head">${role}</div>`;
+    screens.forEach((s,i)=>{ if(s.role===role){ gi++; html += `<button class="screen-btn" data-i="${i}"><span class="num">${String(gi).padStart(2,'0')}</span><span>${s.title}</span></button>`; } });
+    html += `</div>`;
+  });
+  sidebarEl.innerHTML = html;
+  sidebarEl.querySelectorAll('.screen-btn').forEach(btn=> btn.addEventListener('click', ()=> selectScreen(parseInt(btn.dataset.i))));
+}
+function selectScreen(i){
+  const s = screens[i];
+  document.getElementById('crumb').textContent = s.crumb;
+  document.getElementById('stitle').textContent = s.title;
+  document.getElementById('urlbar').textContent = s.url;
+  document.getElementById('cnt').innerHTML = s.render();
+  document.getElementById('note').innerHTML = `<b>Why this layout:</b> ${s.note}`;
+  sidebarEl.querySelectorAll('.screen-btn').forEach(b=> b.classList.toggle('active', parseInt(b.dataset.i)===i));
+}
+buildSidebar();
+selectScreen(0);
+</script>
+</body>
+</html>
