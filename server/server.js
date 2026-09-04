@@ -4,13 +4,16 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
+const proposalRoutes = require('./routes/proposals');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/proposals', proposalRoutes);
 
 app.get('/', (req, res) => {
   res.send('KURIC API is running');
