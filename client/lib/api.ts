@@ -51,3 +51,17 @@ export async function loginUser(payload: LoginPayload) {
   });
   return handleResponse(res);
 }
+export async function submitProposal(formData: FormData, token: string) {
+  const res = await fetch(`${API_BASE}/proposals`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to submit proposal");
+  }
+  return data;
+}

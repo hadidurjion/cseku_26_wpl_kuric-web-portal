@@ -34,7 +34,7 @@ export default function Navbar() {
       </div>
 
       <Link
-        href="/register"
+       href="/proposals/new"
         className="bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg px-4 py-2.5 transition-colors"
       >
         Submit proposal
