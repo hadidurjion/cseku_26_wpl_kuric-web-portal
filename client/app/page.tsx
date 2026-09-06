@@ -1,69 +1,116 @@
-import Image from "next/image";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
-export default function Home() {
+const stats = [
+  { value: "128", label: "Active projects", color: "text-teal-dark" },
+  { value: "340", label: "Publications", color: "text-teal-dark" },
+  { value: "৳4.2Cr", label: "Funded to date", color: "text-gold-dark" },
+];
+
+const news = [
+  {
+    tag: "Event",
+    tagColor: "text-teal-dark",
+    border: "border-teal",
+    title: "Annual research symposium announced",
+    date: "14 Sep 2026",
+  },
+  {
+    tag: "Funding",
+    tagColor: "text-gold-dark",
+    border: "border-gold",
+    title: "Grant call opens for AI research",
+    date: "10 Aug 2026",
+  },
+  {
+    tag: "Publication",
+    tagColor: "text-[#4B5563]",
+    border: "border-[#6B7280]",
+    title: "New study on coastal water quality",
+    date: "3 Aug 2026",
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+
+      <div
+        className="text-center px-10 pt-14 pb-11"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% -10%, #DCEEE9 0%, #FAF8F3 60%)",
+        }}
+      >
+        <div className="text-[11.5px] tracking-widest uppercase text-muted font-bold mb-3.5">
+          Khulna University
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="font-serif-brand text-2xl font-semibold text-body mb-1">
+          Research and Innovation Center
         </div>
-      </main>
+        <h1 className="font-serif-brand text-4xl md:text-5xl font-bold text-teal-dark leading-tight max-w-xl mx-auto mb-4">
+          Where proposals become projects.
+        </h1>
+        <p className="text-sm text-body max-w-md mx-auto mb-6 leading-relaxed">
+          Submit, review, and track research at Khulna University — all in
+          one place.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <button className="bg-teal hover:bg-teal-dark text-white rounded-lg px-6 py-3 text-sm font-semibold transition-colors">
+            Submit a proposal
+          </button>
+          <button className="bg-surface text-ink border-[1.5px] border-[#C9C2AE] rounded-lg px-6 py-3 text-sm font-semibold hover:bg-teal-tint transition-colors">
+            Explore research
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-px bg-border">
+        {stats.map((s) => (
+          <div key={s.label} className="bg-surface text-center py-6 px-5">
+            <div className={`font-serif-brand text-3xl font-bold ${s.color}`}>
+              {s.value}
+            </div>
+            <div className="text-xs text-body font-medium mt-0.5">
+              {s.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="px-10 py-9 flex-1">
+        <div className="flex justify-between items-baseline mb-4">
+          <div className="font-serif-brand text-lg font-bold text-ink">
+            Latest from the center
+          </div>
+          <span className="text-xs text-teal-dark font-semibold cursor-pointer">
+            View all →
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {news.map((item) => (
+            <div
+              key={item.title}
+              className={`bg-surface border border-border ${item.border} border-l-4 rounded-lg p-4`}
+            >
+              <div
+                className={`text-[11px] tracking-wide uppercase font-bold mb-2 ${item.tagColor}`}
+              >
+                {item.tag}
+              </div>
+              <div className="text-sm font-semibold text-ink leading-snug mb-1.5">
+                {item.title}
+              </div>
+              <div className="text-xs text-muted font-medium">
+                {item.date}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Footer />
     </div>
   );
 }
