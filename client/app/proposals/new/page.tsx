@@ -23,10 +23,11 @@ export default function NewProposalPage() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
-  useEffect(() => {
+    useEffect(() => {
     const user = getStoredUser();
-    if (!user) {
-      router.push("/login");
+    const token = getToken();
+    if (!user || !token) {
+      router.replace("/login");
     } else {
       setCheckingAuth(false);
     }
@@ -97,10 +98,13 @@ export default function NewProposalPage() {
     }
   }
 
-  if (checkingAuth) {
+    const user = getStoredUser();
+  const token = getToken();
+
+  if (checkingAuth || !user || !token) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-muted">
-        Checking session...
+        Redirecting to login...
       </div>
     );
   }
