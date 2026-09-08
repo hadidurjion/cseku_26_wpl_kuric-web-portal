@@ -47,6 +47,24 @@ const proposalSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+    reviewer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
+  reviewDecision: {
+    type: String,
+    enum: ['Accept', 'Revision Needed', 'Deny', null],
+    default: null,
+  },
+  reviewComment: {
+    type: String,
+    default: '',
+  },
+  reviewedAt: {
+    type: Date,
+    default: null,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Proposal', proposalSchema);
