@@ -26,6 +26,9 @@ const userSchema = new mongoose.Schema({
   designation: {
     type: String,
   },
+    expertise: {
+    type: String,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

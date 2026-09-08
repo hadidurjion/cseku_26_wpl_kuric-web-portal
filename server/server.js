@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const proposalRoutes = require('./routes/proposals');
+const reviewRoutes = require('./routes/reviews');
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use('/uploads', express.static('uploads'));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/proposals', proposalRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.get('/', (req, res) => {
   res.send('KURIC API is running');

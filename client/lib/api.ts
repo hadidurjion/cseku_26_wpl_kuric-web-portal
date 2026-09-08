@@ -65,3 +65,59 @@ export async function submitProposal(formData: FormData, token: string) {
   }
   return data;
 }
+
+export interface ProposalSummary {
+  _id: string;
+  title: string;
+  status: string;
+  createdAt: string;
+  researcher: { name: string; email: string; department?: string };
+}
+
+export interface ProposalDetail extends ProposalSummary {
+  abstract: string;
+  objectives: string;
+  budget?: string;
+  timeline?: string;
+  coResearchers?: string[];
+  attachments?: { filename: string; originalName: string }[];
+  reviewDecision?: string | null;
+  reviewComment?: string;
+}
+
+export async function getAssignedProposals(token: string) {
+  const res = await fetch(`${API_BASE}/reviews/assigned`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch assigned proposals");
+  return data.proposals as ProposalSummary[];
+}
+
+export async function getProposalDetail(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/reviews/proposal/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch proposal");
+  return data.proposal as ProposalDetail;
+}
+
+export async function submitDecision(
+  id: string,
+  decision: string,
+  comment: string,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/reviews/decide/${id}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ decision, comment }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to submit decision");
+  return data;
+}
