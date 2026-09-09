@@ -12,6 +12,8 @@ interface Proposal {
   title: string;
   status: string;
   createdAt: string;
+  reviewComment?: string;
+  reviewDecision?: string | null;
 }
 
 const statusStyles: Record<string, string> = {
@@ -28,6 +30,7 @@ export default function ProposalsListPage() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -89,23 +92,50 @@ export default function ProposalsListPage() {
           {proposals.map((p) => (
             <div
               key={p._id}
-              className="flex items-center justify-between bg-surface border border-border rounded-xl px-5 py-4"
+              className="bg-surface border border-border rounded-xl px-5 py-4"
             >
-              <div>
-                <div className="text-sm font-semibold text-ink mb-1">
-                  {p.title}
-                </div>
-                <div className="text-xs text-muted">
-                  Submitted {new Date(p.createdAt).toLocaleDateString()}
-                </div>
-              </div>
-              <span
-                className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
-                  statusStyles[p.status] || "bg-[#EFEBE0] text-muted"
-                }`}
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() =>
+                  setExpandedId(expandedId === p._id ? null : p._id)
+                }
               >
-                {p.status}
-              </span>
+                <div>
+                  <div className="text-sm font-semibold text-ink mb-1">
+                    {p.title}
+                  </div>
+                  <div className="text-xs text-muted">
+                    Submitted {new Date(p.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <span
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
+                    statusStyles[p.status] || "bg-[#EFEBE0] text-muted"
+                  }`}
+                >
+                  {p.status}
+                </span>
+              </div>
+
+              {expandedId === p._id && p.reviewComment && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="text-xs font-bold text-muted uppercase tracking-wide mb-1.5">
+                    Reviewer feedback
+                  </div>
+                  <p className="text-sm text-ink leading-relaxed mb-3">
+                    {p.reviewComment}
+                  </p>
+
+                  {p.status === "Revision Needed" && (
+                    <Link
+                      href={`/proposals/${p._id}/revise`}
+                      className="inline-block bg-teal hover:bg-teal-dark text-white text-xs font-semibold rounded-lg px-3.5 py-2 transition-colors"
+                    >
+                      Revise &amp; Resubmit
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

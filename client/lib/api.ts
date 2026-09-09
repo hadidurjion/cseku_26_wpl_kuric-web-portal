@@ -237,3 +237,29 @@ export async function markNotificationsRead(token: string) {
   if (!res.ok) throw new Error(data.message || "Failed to mark read");
   return data;
 }
+export async function resubmitProposal(
+  id: string,
+  payload: Record<string, string>,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/proposals/${id}/resubmit`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to resubmit");
+  return data;
+}
+
+export async function getMyProposalDetail(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/proposals/mine`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch");
+  return (data.proposals as ProposalDetail[]).find((p) => p._id === id);
+}
