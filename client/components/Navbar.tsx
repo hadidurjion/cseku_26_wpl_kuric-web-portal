@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import NotificationBell from "./NotificationBell";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -33,12 +34,15 @@ export default function Navbar() {
         ))}
       </div>
 
-      <Link
-       href="/proposals/new"
-        className="bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg px-4 py-2.5 transition-colors"
-      >
-        Submit proposal
-      </Link>
+            <div className="flex items-center gap-3">
+        <NotificationBell />
+        <Link
+          href="/proposals/new"
+          className="bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg px-4 py-2.5 transition-colors"
+        >
+          Submit proposal
+        </Link>
+      </div>
     </div>
   );
 }

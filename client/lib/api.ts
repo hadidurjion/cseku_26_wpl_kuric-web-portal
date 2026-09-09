@@ -121,3 +121,194 @@ export async function submitDecision(
   if (!res.ok) throw new Error(data.message || "Failed to submit decision");
   return data;
 }
+export interface Reviewer {
+  _id: string;
+  name: string;
+  email: string;
+  expertise?: string;
+}
+
+export interface OfficerProposal extends ProposalSummary {
+  reviewer?: { _id: string; name: string; email: string } | null;
+}
+
+export async function getAllProposals(token: string) {
+  const res = await fetch(`${API_BASE}/reviews/all-proposals`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch proposals");
+  return data.proposals as OfficerProposal[];
+}
+
+export async function getReviewers(token: string) {
+  const res = await fetch(`${API_BASE}/reviews/reviewers`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch reviewers");
+  return data.reviewers as Reviewer[];
+}
+
+export async function assignReviewer(
+  proposalId: string,
+  reviewerId: string,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/reviews/assign/${proposalId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ reviewerId }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to assign reviewer");
+  return data;
+}
+export interface ContentItem {
+  _id: string;
+  type: "event" | "news" | "publication";
+  title: string;
+  description?: string;
+  date?: string;
+  location?: string;
+  authors?: string;
+  year?: string;
+}
+
+export async function getContent(type: string) {
+  const res = await fetch(`${API_BASE}/content?type=${type}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch content");
+  return data.items as ContentItem[];
+}
+
+export async function createContent(
+  item: Partial<ContentItem>,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/content`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(item),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to create content");
+  return data.item as ContentItem;
+}
+
+export async function deleteContent(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/content/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to delete content");
+  return data;
+}
+export interface NotificationItem {
+  _id: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export async function getNotifications(token: string) {
+  const res = await fetch(`${API_BASE}/notifications`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch notifications");
+  return data as { notifications: NotificationItem[]; unreadCount: number };
+}
+
+export async function markNotificationsRead(token: string) {
+  const res = await fetch(`${API_BASE}/notifications/mark-read`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to mark read");
+  return data;
+}
+export async function resubmitProposal(
+  id: string,
+  payload: Record<string, string>,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/proposals/${id}/resubmit`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to resubmit");
+  return data;
+}
+
+export async function getMyProposalDetail(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/proposals/mine`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch");
+  return (data.proposals as ProposalDetail[]).find((p) => p._id === id);
+}
+export interface ManagedUser {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  department?: string;
+  active: boolean;
+}
+
+export async function getAllUsers(token: string) {
+  const res = await fetch(`${API_BASE}/reviews/users`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch users");
+  return data.users as ManagedUser[];
+}
+
+export async function updateUserRole(id: string, role: string, token: string) {
+  const res = await fetch(`${API_BASE}/reviews/users/${id}/role`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ role }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update role");
+  return data;
+}
+
+export async function updateUserStatus(
+  id: string,
+  active: boolean,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/reviews/users/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ active }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update status");
+  return data;
+}
