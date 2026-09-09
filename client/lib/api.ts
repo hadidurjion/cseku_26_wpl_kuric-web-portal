@@ -121,3 +121,49 @@ export async function submitDecision(
   if (!res.ok) throw new Error(data.message || "Failed to submit decision");
   return data;
 }
+export interface Reviewer {
+  _id: string;
+  name: string;
+  email: string;
+  expertise?: string;
+}
+
+export interface OfficerProposal extends ProposalSummary {
+  reviewer?: { _id: string; name: string; email: string } | null;
+}
+
+export async function getAllProposals(token: string) {
+  const res = await fetch(`${API_BASE}/reviews/all-proposals`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch proposals");
+  return data.proposals as OfficerProposal[];
+}
+
+export async function getReviewers(token: string) {
+  const res = await fetch(`${API_BASE}/reviews/reviewers`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch reviewers");
+  return data.reviewers as Reviewer[];
+}
+
+export async function assignReviewer(
+  proposalId: string,
+  reviewerId: string,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/reviews/assign/${proposalId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ reviewerId }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to assign reviewer");
+  return data;
+}
