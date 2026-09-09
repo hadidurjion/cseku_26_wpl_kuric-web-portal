@@ -211,3 +211,29 @@ export async function deleteContent(id: string, token: string) {
   if (!res.ok) throw new Error(data.message || "Failed to delete content");
   return data;
 }
+export interface NotificationItem {
+  _id: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export async function getNotifications(token: string) {
+  const res = await fetch(`${API_BASE}/notifications`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch notifications");
+  return data as { notifications: NotificationItem[]; unreadCount: number };
+}
+
+export async function markNotificationsRead(token: string) {
+  const res = await fetch(`${API_BASE}/notifications/mark-read`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to mark read");
+  return data;
+}

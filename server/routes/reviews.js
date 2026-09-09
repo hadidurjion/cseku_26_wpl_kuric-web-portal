@@ -1,4 +1,5 @@
 const express = require('express');
+const Notification = require('../models/Notification');
 const router = express.Router();
 const Proposal = require('../models/Proposal');
 const User = require('../models/User');
@@ -52,7 +53,7 @@ router.patch('/assign/:proposalId', authMiddleware, requireRole('officer'), asyn
       return res.status(400).json({ message: 'Invalid reviewer' });
     }
 
-    const proposal = await Proposal.findByIdAndUpdate(
+        const proposal = await Proposal.findByIdAndUpdate(
       req.params.proposalId,
       { reviewer: reviewerId, status: 'Under Review' },
       { new: true }
@@ -61,6 +62,12 @@ router.patch('/assign/:proposalId', authMiddleware, requireRole('officer'), asyn
     if (!proposal) {
       return res.status(404).json({ message: 'Proposal not found' });
     }
+
+    await Notification.create({
+      user: reviewerId,
+      message: `You have been assigned to review "${proposal.title}"`,
+      link: `/reviewer/${proposal._id}`,
+    });
 
     res.json({ message: 'Reviewer assigned', proposal });
   } catch (err) {
@@ -120,7 +127,7 @@ router.post('/decide/:id', authMiddleware, requireRole('reviewer'), async (req, 
       Deny: 'Rejected',
     };
 
-    const proposal = await Proposal.findOneAndUpdate(
+        const proposal = await Proposal.findOneAndUpdate(
       { _id: req.params.id, reviewer: req.user.id },
       {
         reviewDecision: decision,
@@ -134,6 +141,12 @@ router.post('/decide/:id', authMiddleware, requireRole('reviewer'), async (req, 
     if (!proposal) {
       return res.status(404).json({ message: 'Proposal not found or not assigned to you' });
     }
+
+    await Notification.create({
+      user: proposal.researcher,
+      message: `Your proposal "${proposal.title}" was marked "${statusMap[decision]}"`,
+      link: `/proposals`,
+    });
 
     res.json({ message: 'Decision recorded', proposal });
   } catch (err) {
