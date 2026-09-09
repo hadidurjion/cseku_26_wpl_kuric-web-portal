@@ -167,3 +167,47 @@ export async function assignReviewer(
   if (!res.ok) throw new Error(data.message || "Failed to assign reviewer");
   return data;
 }
+export interface ContentItem {
+  _id: string;
+  type: "event" | "news" | "publication";
+  title: string;
+  description?: string;
+  date?: string;
+  location?: string;
+  authors?: string;
+  year?: string;
+}
+
+export async function getContent(type: string) {
+  const res = await fetch(`${API_BASE}/content?type=${type}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch content");
+  return data.items as ContentItem[];
+}
+
+export async function createContent(
+  item: Partial<ContentItem>,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/content`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(item),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to create content");
+  return data.item as ContentItem;
+}
+
+export async function deleteContent(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/content/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to delete content");
+  return data;
+}
