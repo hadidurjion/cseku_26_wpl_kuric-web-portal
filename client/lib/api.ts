@@ -263,3 +263,52 @@ export async function getMyProposalDetail(id: string, token: string) {
   if (!res.ok) throw new Error(data.message || "Failed to fetch");
   return (data.proposals as ProposalDetail[]).find((p) => p._id === id);
 }
+export interface ManagedUser {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  department?: string;
+  active: boolean;
+}
+
+export async function getAllUsers(token: string) {
+  const res = await fetch(`${API_BASE}/reviews/users`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch users");
+  return data.users as ManagedUser[];
+}
+
+export async function updateUserRole(id: string, role: string, token: string) {
+  const res = await fetch(`${API_BASE}/reviews/users/${id}/role`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ role }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update role");
+  return data;
+}
+
+export async function updateUserStatus(
+  id: string,
+  active: boolean,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/reviews/users/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ active }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update status");
+  return data;
+}

@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
     expertise: {
     type: String,
   },
+    active: {
+    type: Boolean,
+    default: true,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

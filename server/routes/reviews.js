@@ -156,3 +156,60 @@ router.post('/decide/:id', authMiddleware, requireRole('reviewer'), async (req, 
 });
 
 module.exports = router;
+// GET all users (officer only)
+router.get('/users', authMiddleware, requireRole('officer'), async (req, res) => {
+  try {
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    res.json({ users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error fetching users' });
+  }
+});
+
+// PATCH change a user's role (officer only)
+router.patch('/users/:id/role', authMiddleware, requireRole('officer'), async (req, res) => {
+  try {
+    const { role } = req.body;
+    const validRoles = ['researcher', 'reviewer', 'officer'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ message: 'Invalid role' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'Role updated', user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error updating role' });
+  }
+});
+
+// PATCH activate/deactivate a user (officer only)
+router.patch('/users/:id/status', authMiddleware, requireRole('officer'), async (req, res) => {
+  try {
+    const { active } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { active },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'Status updated', user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error updating status' });
+  }
+});
