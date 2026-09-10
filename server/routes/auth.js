@@ -73,4 +73,68 @@ router.post('/login', async (req, res) => {
   }
 });
 
+
+const crypto = require('crypto');
+
+// In-memory store for reset tokens (fine for academic/demo project)
+const resetTokens = {};
+
+// POST forgot password - generates a reset token
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Don't reveal whether the email exists, for security
+      return res.json({
+        message: 'If that email is registered, a reset link has been generated.',
+      });
+    }
+
+    const token = crypto.randomBytes(20).toString('hex');
+    resetTokens[token] = {
+      userId: user._id.toString(),
+      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    };
+
+    // In production this would be emailed. For this project, we return it directly.
+    res.json({
+      message: 'Reset token generated.',
+      resetToken: token,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error generating reset token' });
+  }
+});
+
+// POST reset password using the token
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: 'Token and new password are required' });
+    }
+
+    const record = resetTokens[token];
+    if (!record || record.expires < Date.now()) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await User.findByIdAndUpdate(record.userId, { password: hashedPassword });
+    delete resetTokens[token];
+
+    res.json({ message: 'Password reset successful. You can now log in.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error resetting password' });
+  }
+});
 module.exports = router;

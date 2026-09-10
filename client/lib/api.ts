@@ -366,3 +366,24 @@ export async function resolveAppeal(
   if (!res.ok) throw new Error(data.message || "Failed to resolve appeal");
   return data;
 }
+export async function forgotPassword(email: string) {
+  const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to process request");
+  return data;
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  const res = await fetch(`${API_BASE}/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, newPassword }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to reset password");
+  return data;
+}
