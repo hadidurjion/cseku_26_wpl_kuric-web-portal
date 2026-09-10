@@ -387,3 +387,38 @@ export async function resetPassword(token: string, newPassword: string) {
   if (!res.ok) throw new Error(data.message || "Failed to reset password");
   return data;
 }
+export interface FullProfile {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  department?: string;
+  designation?: string;
+  bio?: string;
+}
+
+export async function getMyProfile(token: string) {
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch profile");
+  return data.user as FullProfile;
+}
+
+export async function updateMyProfile(
+  payload: { name?: string; department?: string; bio?: string },
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update profile");
+  return data;
+}

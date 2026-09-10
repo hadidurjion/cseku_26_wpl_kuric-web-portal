@@ -137,4 +137,39 @@ router.post('/reset-password', async (req, res) => {
     res.status(500).json({ message: 'Server error resetting password' });
   }
 });
+const authMiddleware = require('../middleware/authMiddleware');
+
+// GET logged-in user's own profile
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error fetching profile' });
+  }
+});
+
+// PATCH update own profile
+router.patch('/me', authMiddleware, async (req, res) => {
+  try {
+    const { name, department, bio } = req.body;
+    const updates = {};
+    if (name) updates.name = name;
+    if (department !== undefined) updates.department = department;
+    if (bio !== undefined) updates.bio = bio;
+
+    const user = await User.findByIdAndUpdate(req.user.id, updates, {
+      new: true,
+    }).select('-password');
+
+    res.json({ message: 'Profile updated', user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error updating profile' });
+  }
+});
 module.exports = router;

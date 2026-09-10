@@ -35,6 +35,12 @@ export default function Navbar() {
       </div>
 
             <div className="flex items-center gap-3">
+		        <Link
+                          href="/profile"
+                          className="text-sm text-body font-medium hover:text-teal-dark transition-colors"
+                         >
+          Profile
+        </Link>
         <NotificationBell />
         <Link
           href="/proposals/new"
