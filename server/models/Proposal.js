@@ -65,6 +65,24 @@ const proposalSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+   appealText: {
+    type: String,
+    default: null,
+  },
+  appealStatus: {
+    type: String,
+    enum: ['None', 'Pending Appeal', 'Reviewed', 'Final Decision', null],
+    default: 'None',
+  },
+  appealDecision: {
+    type: String,
+    enum: ['Overturned', 'Upheld', null],
+    default: null,
+  },
+  appealResponse: {
+    type: String,
+    default: '',
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Proposal', proposalSchema);

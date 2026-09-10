@@ -14,6 +14,7 @@ interface Proposal {
   createdAt: string;
   reviewComment?: string;
   reviewDecision?: string | null;
+  appealStatus?: string;
 }
 
 const statusStyles: Record<string, string> = {
@@ -133,6 +134,20 @@ export default function ProposalsListPage() {
                     >
                       Revise &amp; Resubmit
                     </Link>
+                  )}
+		                  {p.status === "Rejected" &&
+                    (!p.appealStatus || p.appealStatus === "None") && (
+                      <Link
+                        href={`/proposals/${p._id}/appeal`}
+                        className="inline-block bg-surface border-[1.5px] border-danger text-danger text-xs font-semibold rounded-lg px-3.5 py-2 transition-colors"
+                      >
+                        Appeal this decision
+                      </Link>
+                    )}
+                  {p.appealStatus === "Pending Appeal" && (
+                    <span className="text-xs text-gold-dark font-semibold">
+                      Appeal submitted — pending review
+                    </span>
                   )}
                 </div>
               )}

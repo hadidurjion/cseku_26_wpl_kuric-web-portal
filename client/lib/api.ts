@@ -312,3 +312,57 @@ export async function updateUserStatus(
   if (!res.ok) throw new Error(data.message || "Failed to update status");
   return data;
 }
+export async function submitAppeal(
+  id: string,
+  appealText: string,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/proposals/${id}/appeal`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ appealText }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to submit appeal");
+  return data;
+}
+
+export interface AppealProposal {
+  _id: string;
+  title: string;
+  reviewComment?: string;
+  appealText?: string;
+  researcher: { name: string; email: string };
+  reviewer?: { name: string; email: string };
+}
+
+export async function getPendingAppeals(token: string) {
+  const res = await fetch(`${API_BASE}/reviews/appeals`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch appeals");
+  return data.proposals as AppealProposal[];
+}
+
+export async function resolveAppeal(
+  id: string,
+  decision: string,
+  response: string,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/reviews/appeals/${id}/resolve`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ decision, response }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to resolve appeal");
+  return data;
+}

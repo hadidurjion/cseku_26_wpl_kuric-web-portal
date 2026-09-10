@@ -154,6 +154,47 @@ router.post('/decide/:id', authMiddleware, requireRole('reviewer'), async (req, 
     res.status(500).json({ message: 'Server error recording decision' });
   }
 });
+// GET all proposals with pending appeals (officer only)
+router.get('/appeals', authMiddleware, requireRole('officer'), async (req, res) => {
+  try {
+    const proposals = await Proposal.find({ appealStatus: 'Pending Appeal' })
+      .populate('researcher', 'name email')
+      .populate('reviewer', 'name email')
+      .sort({ createdAt: -1 });
+    res.json({ proposals });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error fetching appeals' });
+  }
+});
+
+// PATCH resolve an appeal (officer only)
+router.patch('/appeals/:id/resolve', authMiddleware, requireRole('officer'), async (req, res) => {
+  try {
+    const { decision, response } = req.body;
+    if (!['Overturned', 'Upheld'].includes(decision)) {
+      return res.status(400).json({ message: 'Invalid decision' });
+    }
+
+    const proposal = await Proposal.findById(req.params.id);
+    if (!proposal) {
+      return res.status(404).json({ message: 'Proposal not found' });
+    }
+
+    proposal.appealDecision = decision;
+    proposal.appealResponse = response || '';
+    proposal.appealStatus = 'Final Decision';
+    if (decision === 'Overturned') {
+      proposal.status = 'Under Review';
+    }
+    await proposal.save();
+
+    res.json({ message: 'Appeal resolved', proposal });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error resolving appeal' });
+  }
+});
 
 module.exports = router;
 // GET all users (officer only)
