@@ -82,9 +82,35 @@ export default function OfficerDashboard() {
       <Navbar />
 
       <div className="px-10 py-9 flex-1 max-w-4xl w-full mx-auto">
-        <h1 className="font-serif-brand text-2xl font-bold text-ink mb-1">
-          Officer Dashboard
-        </h1>
+                <div className="flex justify-between items-start mb-1">
+          <h1 className="font-serif-brand text-2xl font-bold text-ink">
+            Officer Dashboard
+          </h1>
+          <button
+            onClick={() => {
+              const headers = ["Title", "Researcher", "Status", "Submitted"];
+              const rows = proposals.map((p) => [
+                p.title,
+                p.researcher?.name || "",
+                p.status,
+                new Date(p.createdAt).toLocaleDateString(),
+              ]);
+              const csv = [headers, ...rows]
+                .map((row) => row.map((cell) => `"${cell}"`).join(","))
+                .join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "kuric_proposals.csv";
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="bg-surface border-[1.5px] border-[#C9C2AE] text-ink text-xs font-semibold rounded-lg px-3.5 py-2 hover:bg-teal-tint transition-colors"
+          >
+            ⬇ Export CSV
+          </button>
+        </div>
         <p className="text-sm text-body mb-6">
           Overview of all proposals and reviewer assignments.
         </p>
