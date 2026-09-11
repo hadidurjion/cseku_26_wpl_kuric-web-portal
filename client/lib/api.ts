@@ -422,3 +422,33 @@ export async function updateMyProfile(
   if (!res.ok) throw new Error(data.message || "Failed to update profile");
   return data;
 }
+export interface HomepageSettings {
+  tagline: string;
+  activeProjectsCount: string;
+  publicationsCount: string;
+  fundedAmount: string;
+}
+
+export async function getHomepageSettings() {
+  const res = await fetch(`${API_BASE}/settings`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch settings");
+  return data.settings as HomepageSettings;
+}
+
+export async function updateHomepageSettings(
+  settings: HomepageSettings,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/settings`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(settings),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update settings");
+  return data;
+}
