@@ -15,6 +15,8 @@ export default function ReviewProposalPage() {
   const [proposal, setProposal] = useState<ProposalDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [aiSummary, setAiSummary] = useState("");
+  const [summarizing, setSummarizing] = useState(false);
   const [decision, setDecision] = useState("");
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -39,7 +41,26 @@ export default function ReviewProposalPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+      
   }, [id, router]);
+  
+  async function fetchSummary() {
+    const token = getToken();
+    if (!token) return;
+    setSummarizing(true);
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/ai/summarize/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      setAiSummary(data.summary || "Could not generate summary.");
+    } catch {
+      setAiSummary("AI summary unavailable.");
+    } finally {
+      setSummarizing(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -98,7 +119,24 @@ export default function ReviewProposalPage() {
           By {proposal.researcher?.name} ({proposal.researcher?.email}) ·{" "}
           {proposal.researcher?.department}
         </p>
-
+        
+	 <div className="bg-gold-tint border-l-4 border-gold rounded-xl p-4 mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-gold-dark uppercase tracking-wide">
+              AI-Generated Summary
+            </span>
+            <button
+              onClick={fetchSummary}
+              disabled={summarizing}
+              className="text-xs font-semibold text-gold-dark underline disabled:opacity-50"
+            >
+              {summarizing ? "Generating..." : aiSummary ? "Regenerate" : "Generate"}
+            </button>
+          </div>
+          <p className="text-sm text-ink">
+            {aiSummary || "Click Generate to get an AI summary of this proposal."}
+          </p>
+        </div>
         <div className="space-y-5 mb-8">
           <div>
             <div className="text-xs font-bold text-muted uppercase tracking-wide mb-1.5">

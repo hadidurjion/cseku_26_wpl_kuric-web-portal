@@ -312,3 +312,143 @@ export async function updateUserStatus(
   if (!res.ok) throw new Error(data.message || "Failed to update status");
   return data;
 }
+export async function submitAppeal(
+  id: string,
+  appealText: string,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/proposals/${id}/appeal`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ appealText }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to submit appeal");
+  return data;
+}
+
+export interface AppealProposal {
+  _id: string;
+  title: string;
+  reviewComment?: string;
+  appealText?: string;
+  researcher: { name: string; email: string };
+  reviewer?: { name: string; email: string };
+}
+
+export async function getPendingAppeals(token: string) {
+  const res = await fetch(`${API_BASE}/reviews/appeals`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch appeals");
+  return data.proposals as AppealProposal[];
+}
+
+export async function resolveAppeal(
+  id: string,
+  decision: string,
+  response: string,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/reviews/appeals/${id}/resolve`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ decision, response }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to resolve appeal");
+  return data;
+}
+export async function forgotPassword(email: string) {
+  const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to process request");
+  return data;
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  const res = await fetch(`${API_BASE}/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, newPassword }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to reset password");
+  return data;
+}
+export interface FullProfile {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  department?: string;
+  designation?: string;
+  bio?: string;
+}
+
+export async function getMyProfile(token: string) {
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch profile");
+  return data.user as FullProfile;
+}
+
+export async function updateMyProfile(
+  payload: { name?: string; department?: string; bio?: string },
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update profile");
+  return data;
+}
+export interface HomepageSettings {
+  tagline: string;
+  activeProjectsCount: string;
+  publicationsCount: string;
+  fundedAmount: string;
+}
+
+export async function getHomepageSettings() {
+  const res = await fetch(`${API_BASE}/settings`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch settings");
+  return data.settings as HomepageSettings;
+}
+
+export async function updateHomepageSettings(
+  settings: HomepageSettings,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/settings`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(settings),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update settings");
+  return data;
+}

@@ -1,11 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const stats = [
-  { value: "128", label: "Active projects", color: "text-teal-dark" },
-  { value: "340", label: "Publications", color: "text-teal-dark" },
-  { value: "৳4.2Cr", label: "Funded to date", color: "text-gold-dark" },
-];
+import { getHomepageSettings, HomepageSettings } from "@/lib/api";
 
 const news = [
   {
@@ -31,7 +29,40 @@ const news = [
   },
 ];
 
+const defaultSettings: HomepageSettings = {
+  tagline: "Where proposals become projects.",
+  activeProjectsCount: "128",
+  publicationsCount: "340",
+  fundedAmount: "৳4.2Cr",
+};
+
 export default function HomePage() {
+  const [settings, setSettings] = useState<HomepageSettings>(defaultSettings);
+
+  useEffect(() => {
+    getHomepageSettings()
+      .then(setSettings)
+      .catch(() => {});
+  }, []);
+
+  const stats = [
+    {
+      value: settings.activeProjectsCount,
+      label: "Active projects",
+      color: "text-teal-dark",
+    },
+    {
+      value: settings.publicationsCount,
+      label: "Publications",
+      color: "text-teal-dark",
+    },
+    {
+      value: settings.fundedAmount,
+      label: "Funded to date",
+      color: "text-gold-dark",
+    },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -50,7 +81,7 @@ export default function HomePage() {
           Research and Innovation Center
         </div>
         <h1 className="font-serif-brand text-4xl md:text-5xl font-bold text-teal-dark leading-tight max-w-xl mx-auto mb-4">
-          Where proposals become projects.
+          {settings.tagline}
         </h1>
         <p className="text-sm text-body max-w-md mx-auto mb-6 leading-relaxed">
           Submit, review, and track research at Khulna University — all in

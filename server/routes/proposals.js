@@ -77,6 +77,39 @@ router.get('/mine', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Server error while fetching proposals' });
   }
 });
+// POST submit an appeal (researcher only, must own the rejected proposal)
+router.post('/:id/appeal', authMiddleware, async (req, res) => {
+  try {
+    const { appealText } = req.body;
+    if (!appealText || appealText.trim() === '') {
+      return res.status(400).json({ message: 'Appeal justification is required' });
+    }
+
+    const proposal = await Proposal.findOne({
+      _id: req.params.id,
+      researcher: req.user.id,
+    });
+
+    if (!proposal) {
+      return res.status(404).json({ message: 'Proposal not found' });
+    }
+
+    if (proposal.status !== 'Rejected') {
+      return res
+        .status(400)
+        .json({ message: 'Only rejected proposals can be appealed' });
+    }
+
+    proposal.appealText = appealText;
+    proposal.appealStatus = 'Pending Appeal';
+    await proposal.save();
+
+    res.json({ message: 'Appeal submitted', proposal });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error submitting appeal' });
+  }
+});
 
 module.exports = router;
 // PATCH resubmit a revised proposal (researcher only, must own it)

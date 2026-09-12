@@ -29,6 +29,10 @@ export default function OfficerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [assigning, setAssigning] = useState<string | null>(null);
+    const [matchSuggestions, setMatchSuggestions] = useState
+    Record<string, { name: string; matchPercent: number; reason: string }[]>
+  >({});
+  const [matching, setMatching] = useState<string | null>(null);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -71,6 +75,29 @@ export default function OfficerDashboard() {
       setAssigning(null);
     }
   }
+   async function handleMatchReviewer(proposalId: string) {
+    const token = getToken();
+    if (!token) return;
+    setMatching(proposalId);
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/ai/match-reviewer/${proposalId}`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await res.json();
+      setMatchSuggestions((prev) => ({
+        ...prev,
+        [proposalId]: data.suggestions || [],
+      }));
+    } catch {
+      setError("Failed to get AI suggestions");
+    } finally {
+      setMatching(null);
+    }
+  }
 
   const counts = proposals.reduce((acc: Record<string, number>, p) => {
     acc[p.status] = (acc[p.status] || 0) + 1;
@@ -82,9 +109,35 @@ export default function OfficerDashboard() {
       <Navbar />
 
       <div className="px-10 py-9 flex-1 max-w-4xl w-full mx-auto">
-        <h1 className="font-serif-brand text-2xl font-bold text-ink mb-1">
-          Officer Dashboard
-        </h1>
+                <div className="flex justify-between items-start mb-1">
+          <h1 className="font-serif-brand text-2xl font-bold text-ink">
+            Officer Dashboard
+          </h1>
+          <button
+            onClick={() => {
+              const headers = ["Title", "Researcher", "Status", "Submitted"];
+              const rows = proposals.map((p) => [
+                p.title,
+                p.researcher?.name || "",
+                p.status,
+                new Date(p.createdAt).toLocaleDateString(),
+              ]);
+              const csv = [headers, ...rows]
+                .map((row) => row.map((cell) => `"${cell}"`).join(","))
+                .join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "kuric_proposals.csv";
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="bg-surface border-[1.5px] border-[#C9C2AE] text-ink text-xs font-semibold rounded-lg px-3.5 py-2 hover:bg-teal-tint transition-colors"
+          >
+            ⬇ Export CSV
+          </button>
+        </div>
         <p className="text-sm text-body mb-6">
           Overview of all proposals and reviewer assignments.
         </p>
@@ -138,7 +191,31 @@ export default function OfficerDashboard() {
                   {p.status}
                 </span>
               </div>
+	     
+              <button
+                onClick={() => handleMatchReviewer(p._id)}
+                disabled={matching === p._id}
+                className="text-xs font-semibold text-teal-dark underline mb-2 disabled:opacity-50"
+              >
+                {matching === p._id ? "Finding matches..." : "✨ AI Suggest Reviewer"}
+              </button>
 
+              {matchSuggestions[p._id] && (
+                <div className="flex gap-2 mb-2">
+                  {matchSuggestions[p._id].map((s) => (
+                    <div
+                      key={s.name}
+                      className="bg-teal-tint rounded-lg px-2.5 py-1.5 text-xs"
+                    >
+                      <span className="font-bold text-teal-dark">
+                        {s.name}
+                      </span>{" "}
+                      <span className="text-teal-dark">({s.matchPercent}%)</span>
+                      <div className="text-muted mt-0.5">{s.reason}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="flex items-center gap-2 mt-3">
                 <span className="text-xs text-muted font-medium">
                   Reviewer:
