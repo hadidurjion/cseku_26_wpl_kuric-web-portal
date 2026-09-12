@@ -29,6 +29,10 @@ export default function OfficerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [assigning, setAssigning] = useState<string | null>(null);
+    const [matchSuggestions, setMatchSuggestions] = useState
+    Record<string, { name: string; matchPercent: number; reason: string }[]>
+  >({});
+  const [matching, setMatching] = useState<string | null>(null);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -69,6 +73,29 @@ export default function OfficerDashboard() {
       setError(err instanceof Error ? err.message : "Failed to assign");
     } finally {
       setAssigning(null);
+    }
+  }
+   async function handleMatchReviewer(proposalId: string) {
+    const token = getToken();
+    if (!token) return;
+    setMatching(proposalId);
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/ai/match-reviewer/${proposalId}`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await res.json();
+      setMatchSuggestions((prev) => ({
+        ...prev,
+        [proposalId]: data.suggestions || [],
+      }));
+    } catch {
+      setError("Failed to get AI suggestions");
+    } finally {
+      setMatching(null);
     }
   }
 
@@ -164,7 +191,31 @@ export default function OfficerDashboard() {
                   {p.status}
                 </span>
               </div>
+	     
+              <button
+                onClick={() => handleMatchReviewer(p._id)}
+                disabled={matching === p._id}
+                className="text-xs font-semibold text-teal-dark underline mb-2 disabled:opacity-50"
+              >
+                {matching === p._id ? "Finding matches..." : "✨ AI Suggest Reviewer"}
+              </button>
 
+              {matchSuggestions[p._id] && (
+                <div className="flex gap-2 mb-2">
+                  {matchSuggestions[p._id].map((s) => (
+                    <div
+                      key={s.name}
+                      className="bg-teal-tint rounded-lg px-2.5 py-1.5 text-xs"
+                    >
+                      <span className="font-bold text-teal-dark">
+                        {s.name}
+                      </span>{" "}
+                      <span className="text-teal-dark">({s.matchPercent}%)</span>
+                      <div className="text-muted mt-0.5">{s.reason}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="flex items-center gap-2 mt-3">
                 <span className="text-xs text-muted font-medium">
                   Reviewer:

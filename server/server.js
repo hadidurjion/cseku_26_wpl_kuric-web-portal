@@ -9,6 +9,7 @@ const reviewRoutes = require('./routes/reviews');
 const contentRoutes = require('./routes/content');
 const notificationRoutes = require('./routes/notifications');
 const settingsRoutes = require('./routes/settings');
+const aiRoutes = require('./routes/ai');
 const officerRoutes = require('./routes/officer');
 
 const app = express();
@@ -23,6 +24,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/ai', aiRoutes);
 app.use('/api/officer', officerRoutes);
 
 app.get('/', (req, res) => {
