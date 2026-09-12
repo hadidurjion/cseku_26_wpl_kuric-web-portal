@@ -196,6 +196,35 @@ router.patch('/appeals/:id/resolve', authMiddleware, requireRole('officer'), asy
   }
 });
 
+const bcrypt = require('bcryptjs');
+
+// PATCH admin reset a user's password (officer only)
+router.patch('/users/:id/reset-password', authMiddleware, requireRole('officer'), async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { password: hashedPassword },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'Password reset successfully', user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error resetting password' });
+  }
+});
 module.exports = router;
 // GET all users (officer only)
 router.get('/users', authMiddleware, requireRole('officer'), async (req, res) => {

@@ -59,4 +59,17 @@ router.delete('/:id', authMiddleware, requireOfficer, async (req, res) => {
   }
 });
 
+// GET global search across all content types
+router.get('/search/:query', async (req, res) => {
+  try {
+    const q = req.params.query;
+    const items = await Content.find({
+      title: { $regex: q, $options: 'i' },
+    }).limit(15);
+    res.json({ items });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error searching content' });
+  }
+});
 module.exports = router;

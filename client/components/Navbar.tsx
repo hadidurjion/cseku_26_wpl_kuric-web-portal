@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import NotificationBell from "./NotificationBell";
+import SearchBar from "./SearchBar";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -41,6 +42,7 @@ export default function Navbar() {
                          >
           Profile
         </Link>
+	<SearchBar />
         <NotificationBell />
         <Link
           href="/proposals/new"

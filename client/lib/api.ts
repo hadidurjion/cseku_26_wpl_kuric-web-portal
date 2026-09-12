@@ -452,3 +452,26 @@ export async function updateHomepageSettings(
   if (!res.ok) throw new Error(data.message || "Failed to update settings");
   return data;
 }
+export async function adminResetPassword(
+  userId: string,
+  newPassword: string,
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/reviews/users/${userId}/reset-password`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newPassword }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to reset password");
+  return data;
+}
+export async function searchContent(query: string) {
+  const res = await fetch(`${API_BASE}/content/search/${encodeURIComponent(query)}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Search failed");
+  return data.items as ContentItem[];
+}
