@@ -427,8 +427,13 @@ export interface HomepageSettings {
   activeProjectsCount: string;
   publicationsCount: string;
   fundedAmount: string;
+  aboutMission?: string;
+  directorName?: string;
+  directorTitle?: string;
+  contactEmail?: string;
+  contactAddress?: string;
+  contactPhone?: string;
 }
-
 export async function getHomepageSettings() {
   const res = await fetch(`${API_BASE}/settings`);
   const data = await res.json();

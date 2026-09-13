@@ -27,12 +27,33 @@ router.get('/', async (req, res) => {
 // PUT update homepage settings (officer only)
 router.put('/', authMiddleware, requireOfficer, async (req, res) => {
   try {
-    const { tagline, activeProjectsCount, publicationsCount, fundedAmount } =
-      req.body;
+    const {
+      tagline,
+      activeProjectsCount,
+      publicationsCount,
+      fundedAmount,
+      aboutMission,
+      directorName,
+      directorTitle,
+      contactEmail,
+      contactAddress,
+      contactPhone,
+    } = req.body;
 
     const settings = await Settings.findOneAndUpdate(
       { key: 'homepage' },
-      { tagline, activeProjectsCount, publicationsCount, fundedAmount },
+      {
+        tagline,
+        activeProjectsCount,
+        publicationsCount,
+        fundedAmount,
+        aboutMission,
+        directorName,
+        directorTitle,
+        contactEmail,
+        contactAddress,
+        contactPhone,
+      },
       { new: true, upsert: true }
     );
 

@@ -1,20 +1,20 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const publications = [
-  {
-    title: "Groundwater contamination patterns",
-    authors: "Rahman et al.",
-    year: "2025",
-  },
-  {
-    title: "Machine learning for crop yield",
-    authors: "Tamanna, S.",
-    year: "2024",
-  },
-];
+import { getContent, ContentItem } from "@/lib/api";
 
 export default function PublicationsPage() {
+  const [publications, setPublications] = useState<ContentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getContent("publication")
+      .then(setPublications)
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -24,40 +24,33 @@ export default function PublicationsPage() {
           Publications
         </h1>
 
-        <div className="flex gap-2 mb-4">
-          <select className="h-9 border-[1.5px] border-[#C9C2AE] rounded-lg text-xs px-2.5 bg-surface text-ink">
-            <option>Year</option>
-          </select>
-          <select className="h-9 border-[1.5px] border-[#C9C2AE] rounded-lg text-xs px-2.5 bg-surface text-ink">
-            <option>Author</option>
-          </select>
-          <input
-            placeholder="Search publications"
-            className="h-9 border-[1.5px] border-[#C9C2AE] rounded-lg text-xs px-3 flex-1 bg-surface"
-          />
-        </div>
+        {loading && <p className="text-sm text-muted">Loading...</p>}
 
-        <div className="bg-surface border border-border rounded-xl overflow-hidden">
-          <div className="grid grid-cols-[2fr_1fr_0.6fr_0.5fr] px-4 py-2.5 text-[11.5px] text-muted font-bold bg-[#F0EEE6]">
-            <span>Title</span>
-            <span>Author(s)</span>
-            <span>Year</span>
-            <span></span>
+        {!loading && publications.length === 0 && (
+          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-8 text-center">
+            No publications yet.
           </div>
-          {publications.map((pub) => (
-            <div
-              key={pub.title}
-              className="grid grid-cols-[2fr_1fr_0.6fr_0.5fr] px-4 py-3.5 text-sm font-medium text-ink border-t border-border items-center"
-            >
-              <span>{pub.title}</span>
-              <span className="text-body">{pub.authors}</span>
-              <span className="text-body">{pub.year}</span>
-              <span className="text-teal-dark font-bold text-sm">
-                ↓ PDF
-              </span>
+        )}
+
+        {publications.length > 0 && (
+          <div className="bg-surface border border-border rounded-xl overflow-hidden">
+            <div className="grid grid-cols-[2fr_1fr_0.6fr] px-4 py-2.5 text-[11.5px] text-muted font-bold bg-[#F0EEE6]">
+              <span>Title</span>
+              <span>Author(s)</span>
+              <span>Year</span>
             </div>
-          ))}
-        </div>
+            {publications.map((pub) => (
+              <div
+                key={pub._id}
+                className="grid grid-cols-[2fr_1fr_0.6fr] px-4 py-3.5 text-sm font-medium text-ink border-t border-border items-center"
+              >
+                <span>{pub.title}</span>
+                <span className="text-body">{pub.authors || "—"}</span>
+                <span className="text-body">{pub.year || "—"}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <Footer />

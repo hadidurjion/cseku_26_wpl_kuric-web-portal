@@ -1,18 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getContent, ContentItem } from "@/lib/api";
 
-const tabs = ["Upcoming", "Past events", "News"];
-
-const upcomingEvents = [
-  { day: "14", month: "SEP", title: "Annual research symposium", venue: "KU Auditorium" },
-  { day: "28", month: "SEP", title: "Workshop on grant writing", venue: "Seminar Room 2" },
-];
+const tabs = ["Upcoming", "News"];
 
 export default function EventsPage() {
   const [active, setActive] = useState("Upcoming");
+  const [events, setEvents] = useState<ContentItem[]>([]);
+  const [news, setNews] = useState<ContentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([getContent("event"), getContent("news")])
+      .then(([ev, nw]) => {
+        setEvents(ev);
+        setNews(nw);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -39,43 +47,64 @@ export default function EventsPage() {
           ))}
         </div>
 
-        {active === "Upcoming" && (
+        {loading && <p className="text-sm text-muted">Loading...</p>}
+
+        {active === "Upcoming" && !loading && (
           <div className="space-y-2.5">
-            {upcomingEvents.map((ev) => (
-              <div
-                key={ev.title}
-                className="flex gap-4 items-center bg-surface border border-border border-l-4 border-l-teal rounded-xl px-4 py-3.5"
-              >
-                <div className="text-center w-11 flex-shrink-0">
-                  <div className="font-serif-brand text-lg font-bold text-teal-dark">
-                    {ev.day}
-                  </div>
-                  <div className="text-[10px] text-muted font-bold">
-                    {ev.month}
+            {events.length === 0 && (
+              <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-8 text-center">
+                No events to show yet.
+              </div>
+            )}
+            {events.map((ev) => {
+              const date = ev.date ? new Date(ev.date) : null;
+              return (
+                <div
+                  key={ev._id}
+                  className="flex gap-4 items-center bg-surface border border-border border-l-4 border-l-teal rounded-xl px-4 py-3.5"
+                >
+                  {date && (
+                    <div className="text-center w-11 flex-shrink-0">
+                      <div className="font-serif-brand text-lg font-bold text-teal-dark">
+                        {date.getDate()}
+                      </div>
+                      <div className="text-[10px] text-muted font-bold">
+                        {date.toLocaleString("default", { month: "short" }).toUpperCase()}
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <div className="font-bold text-sm text-ink">
+                      {ev.title}
+                    </div>
+                    <div className="text-xs text-muted font-medium">
+                      {ev.location || ev.description}
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <div className="font-bold text-sm text-ink">
-                    {ev.title}
-                  </div>
-                  <div className="text-xs text-muted font-medium">
-                    {ev.venue}
-                  </div>
+              );
+            })}
+          </div>
+        )}
+
+        {active === "News" && !loading && (
+          <div className="space-y-2.5">
+            {news.length === 0 && (
+              <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-8 text-center">
+                No news articles to show yet.
+              </div>
+            )}
+            {news.map((item) => (
+              <div
+                key={item._id}
+                className="bg-surface border border-border border-l-4 border-l-gold rounded-xl px-4 py-3.5"
+              >
+                <div className="font-bold text-sm text-ink">{item.title}</div>
+                <div className="text-xs text-muted font-medium mt-1">
+                  {item.description}
                 </div>
               </div>
             ))}
-          </div>
-        )}
-
-        {active === "Past events" && (
-          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-8 text-center">
-            No past events to show yet.
-          </div>
-        )}
-
-        {active === "News" && (
-          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-8 text-center">
-            No news articles to show yet.
           </div>
         )}
       </div>

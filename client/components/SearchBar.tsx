@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { searchContent, ContentItem } from "@/lib/api";
+import Link from "next/link";
 
 export default function SearchBar() {
   const [open, setOpen] = useState(false);
@@ -70,19 +71,28 @@ export default function SearchBar() {
             {!loading && query && results.length === 0 && (
               <p className="px-4 py-3 text-xs text-muted">No results found.</p>
             )}
-            {results.map((item) => (
-              <div
-                key={item._id}
-                className="px-4 py-3 border-b border-border last:border-b-0 hover:bg-teal-tint transition-colors"
-              >
-                <span className="text-[10px] font-bold text-teal-dark uppercase tracking-wide">
-                  {typeLabels[item.type]}
-                </span>
-                <div className="text-sm font-semibold text-ink">
-                  {item.title}
-                </div>
-              </div>
-            ))}
+            {results.map((item) => {
+              const typeToPage: Record<string, string> = {
+                event: "/events",
+                news: "/events",
+                publication: "/publications",
+              };
+              return (
+                <Link
+                  key={item._id}
+                  href={typeToPage[item.type] || "/"}
+                  onClick={() => setOpen(false)}
+                  className="block px-4 py-3 border-b border-border last:border-b-0 hover:bg-teal-tint transition-colors"
+                >
+                  <span className="text-[10px] font-bold text-teal-dark uppercase tracking-wide">
+                    {typeLabels[item.type]}
+                  </span>
+                  <div className="text-sm font-semibold text-ink">
+                    {item.title}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

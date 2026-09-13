@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getHomepageSettings, HomepageSettings } from "@/lib/api";
 
 export default function ContactPage() {
+  const [settings, setSettings] = useState<HomepageSettings | null>(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    getHomepageSettings().then(setSettings).catch(() => {});
+  }, []);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -16,7 +22,6 @@ export default function ContactPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: connect to backend inquiry API later
     setSubmitted(true);
   }
 
@@ -25,7 +30,6 @@ export default function ContactPage() {
       <Navbar />
 
       <div className="grid grid-cols-1 md:grid-cols-2 flex-1">
-        {/* Form side */}
         <div className="px-10 py-9">
           <h1 className="font-serif-brand text-xl font-bold text-ink mb-5">
             Get in touch
@@ -81,17 +85,16 @@ export default function ContactPage() {
           )}
         </div>
 
-        {/* Info side */}
         <div className="px-10 py-9 bg-teal-tint">
           <div className="h-28 bg-surface rounded-xl border border-border mb-4 flex items-center justify-center text-xs text-muted">
             Map placeholder
           </div>
           <div className="text-sm text-ink font-medium leading-loose">
-            Khulna University, Khulna 9208
+            {settings?.contactAddress || "Khulna University, Khulna 9208"}
             <br />
-            kuric@ku.ac.bd
+            {settings?.contactEmail || "kuric@ku.ac.bd"}
             <br />
-            +880 41-xxxxxx
+            {settings?.contactPhone || "+880 41-xxxxxx"}
           </div>
         </div>
       </div>
