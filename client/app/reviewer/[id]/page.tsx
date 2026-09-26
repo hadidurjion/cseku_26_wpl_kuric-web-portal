@@ -41,9 +41,8 @@ export default function ReviewProposalPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-      
   }, [id, router]);
-  
+
   async function fetchSummary() {
     const token = getToken();
     if (!token) return;
@@ -119,8 +118,8 @@ export default function ReviewProposalPage() {
           By {proposal.researcher?.name} ({proposal.researcher?.email}) ·{" "}
           {proposal.researcher?.department}
         </p>
-        
-	 <div className="bg-gold-tint border-l-4 border-gold rounded-xl p-4 mb-6">
+
+        <div className="bg-gold-tint border-l-4 border-gold rounded-xl p-4 mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-gold-dark uppercase tracking-wide">
               AI-Generated Summary
@@ -137,6 +136,7 @@ export default function ReviewProposalPage() {
             {aiSummary || "Click Generate to get an AI summary of this proposal."}
           </p>
         </div>
+
         <div className="space-y-5 mb-8">
           <div>
             <div className="text-xs font-bold text-muted uppercase tracking-wide mb-1.5">
@@ -176,6 +176,27 @@ export default function ReviewProposalPage() {
               <p className="text-sm text-ink">
                 {proposal.coResearchers.join(", ")}
               </p>
+            </div>
+          )}
+          {proposal.attachments && proposal.attachments.length > 0 && (
+            <div>
+              <div className="text-xs font-bold text-muted uppercase tracking-wide mb-1.5">
+                Attachments
+              </div>
+              <div className="space-y-1.5">
+                {proposal.attachments.map((file) => (
+                  <a
+                    key={file.filename}
+                    href={"http://localhost:5000/api/files/" + encodeURIComponent(file.filename)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                    className="flex items-center gap-2 text-sm text-teal-dark font-semibold hover:underline"
+                  >
+                    📎 {file.originalName}
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </div>

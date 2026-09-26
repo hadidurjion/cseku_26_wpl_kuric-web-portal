@@ -13,11 +13,17 @@ import {
 
 export default function HomepageSettingsPage() {
   const router = useRouter();
-  const [form, setForm] = useState<HomepageSettings>({
+    const [form, setForm] = useState<HomepageSettings>({
     tagline: "",
     activeProjectsCount: "",
     publicationsCount: "",
     fundedAmount: "",
+    aboutMission: "",
+    directorName: "",
+    directorTitle: "",
+    contactEmail: "",
+    contactAddress: "",
+    contactPhone: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,7 +48,9 @@ export default function HomepageSettingsPage() {
       .finally(() => setLoading(false));
   }, [router]);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
@@ -110,40 +118,73 @@ export default function HomepageSettingsPage() {
               className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
             />
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="pt-3 border-t border-border">
+            <label className="block text-sm font-medium text-ink mb-1">
+              About — mission statement
+            </label>
+            <textarea
+              name="aboutMission"
+              value={form.aboutMission}
+              onChange={handleChange}
+              className="w-full h-20 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal resize-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-ink mb-1">
-                Active projects
+                Director name
               </label>
               <input
-                name="activeProjectsCount"
-                value={form.activeProjectsCount}
+                name="directorName"
+                value={form.directorName}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-ink mb-1">
-                Publications
+                Director title
               </label>
               <input
-                name="publicationsCount"
-                value={form.publicationsCount}
+                name="directorTitle"
+                value={form.directorTitle}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-ink mb-1">
-                Funded
-              </label>
-              <input
-                name="fundedAmount"
-                value={form.fundedAmount}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
-              />
-            </div>
+          </div>
+          <div className="pt-3 border-t border-border">
+            <label className="block text-sm font-medium text-ink mb-1">
+              Contact email
+            </label>
+            <input
+              name="contactEmail"
+              value={form.contactEmail}
+              onChange={handleChange}
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink mb-1">
+              Contact address
+            </label>
+            <input
+              name="contactAddress"
+              value={form.contactAddress}
+              onChange={handleChange}
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink mb-1">
+              Contact phone
+            </label>
+            <input
+              name="contactPhone"
+              value={form.contactPhone}
+              onChange={handleChange}
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal"
+            />
           </div>
           <button
             type="submit"

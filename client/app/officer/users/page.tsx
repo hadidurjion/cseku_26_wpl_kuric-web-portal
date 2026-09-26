@@ -5,12 +5,8 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getToken, getStoredUser } from "@/lib/auth";
-import {
-  getAllUsers,
-  updateUserRole,
-  updateUserStatus,
-  ManagedUser,
-} from "@/lib/api";
+import { getAllUsers, updateUserRole, updateUserStatus, adminResetPassword, ManagedUser } from "@/lib/api";
+
 
 const roleStyles: Record<string, string> = {
   researcher: "bg-[#EFEBE0] text-muted",
@@ -141,6 +137,32 @@ export default function UserManagementPage() {
               >
                 {u.active ? "Disable" : "Activate"}
               </button>
+	                    <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => handleStatusToggle(u._id, u.active)}
+                  disabled={updatingId === u._id}
+                  className="text-xs font-semibold text-teal-dark hover:underline text-left"
+                >
+                  {u.active ? "Disable" : "Activate"}
+                </button>
+                <button
+                  onClick={async () => {
+                    const newPass = prompt(`New password for ${u.name}:`);
+                    if (!newPass) return;
+                    const token = getToken();
+                    if (!token) return;
+                    try {
+                      await adminResetPassword(u._id, newPass, token);
+                      alert("Password reset successfully");
+                    } catch (err) {
+                      alert(err instanceof Error ? err.message : "Failed");
+                    }
+                  }}
+                  className="text-xs font-semibold text-gold-dark hover:underline text-left"
+                >
+                  Reset password
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -12,11 +12,12 @@ interface Proposal {
   title: string;
   status: string;
   createdAt: string;
+  updatedAt?: string;
+  reviewedAt?: string | null;
   reviewComment?: string;
   reviewDecision?: string | null;
   appealStatus?: string;
 }
-
 const statusStyles: Record<string, string> = {
   Draft: "bg-[#EFEBE0] text-muted",
   Pending: "bg-gold-tint text-gold-dark",
@@ -32,6 +33,7 @@ export default function ProposalsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("All");
 
   useEffect(() => {
     const user = getStoredUser();
@@ -90,7 +92,26 @@ export default function ProposalsListPage() {
         )}
 
         <div className="space-y-3">
-          {proposals.map((p) => (
+	        <div className="flex gap-2 mb-4">
+          {["All", "Pending", "Under Review", "Accepted", "Revision Needed", "Rejected"].map(
+            (s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  statusFilter === s
+                    ? "bg-teal text-white"
+                    : "border-[1.5px] border-[#C9C2AE] text-body"
+                }`}
+              >
+                {s}
+              </button>
+            )
+          )}
+        </div>
+         {proposals
+          .filter((p) => statusFilter === "All" || p.status === statusFilter)
+          .map((p) => (
             <div
               key={p._id}
               className="bg-surface border border-border rounded-xl px-5 py-4"
@@ -117,7 +138,41 @@ export default function ProposalsListPage() {
                   {p.status}
                 </span>
               </div>
-
+	                 {expandedId === p._id && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="text-xs font-bold text-muted uppercase tracking-wide mb-2">
+                    History
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-2 h-2 rounded-full bg-teal" />
+                      <span className="text-ink font-medium">Submitted</span>
+                      <span className="text-muted">
+                        {new Date(p.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    {p.reviewedAt && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <div className="w-2 h-2 rounded-full bg-gold" />
+                        <span className="text-ink font-medium">
+                          Reviewed — {p.reviewDecision || p.status}
+                        </span>
+                        <span className="text-muted">
+                          {new Date(p.reviewedAt).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {p.appealStatus && p.appealStatus !== "None" && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <div className="w-2 h-2 rounded-full bg-danger" />
+                        <span className="text-ink font-medium">
+                          Appeal — {p.appealStatus}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )} 
               {expandedId === p._id && p.reviewComment && (
                 <div className="mt-4 pt-4 border-t border-border">
                   <div className="text-xs font-bold text-muted uppercase tracking-wide mb-1.5">

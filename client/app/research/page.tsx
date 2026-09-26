@@ -1,37 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getContent, ContentItem } from "@/lib/api";
 
 const categories = ["All", "ICT", "Environment", "Health"];
 
-const projects = [
-  {
-    title: "AI in agriculture",
-    category: "ICT",
-    status: "Ongoing",
-    statusColor: "bg-teal-tint text-teal-dark",
-    border: "border-l-teal",
-  },
-  {
-    title: "Coastal water quality",
-    category: "Environment",
-    status: "Funded",
-    statusColor: "bg-gold-tint text-gold-dark",
-    border: "border-l-gold",
-  },
-  {
-    title: "Rural health access",
-    category: "Health",
-    status: "Completed",
-    statusColor: "bg-[#E5E5E0] text-body",
-    border: "border-l-[#6B7280]",
-  },
-];
+const statusStyles: Record<string, string> = {
+  Ongoing: "bg-teal-tint text-teal-dark",
+  Funded: "bg-gold-tint text-gold-dark",
+  Completed: "bg-[#E5E5E0] text-body",
+};
+
+const borderStyles: Record<string, string> = {
+  Ongoing: "border-l-teal",
+  Funded: "border-l-gold",
+  Completed: "border-l-[#6B7280]",
+};
 
 export default function ResearchPage() {
   const [active, setActive] = useState("All");
+  const [projects, setProjects] = useState<ContentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getContent("research")
+      .then(setProjects)
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered =
     active === "All" ? projects : projects.filter((p) => p.category === active);
@@ -61,20 +58,32 @@ export default function ResearchPage() {
           ))}
         </div>
 
+        {loading && <p className="text-sm text-muted">Loading...</p>}
+
+        {!loading && filtered.length === 0 && (
+          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-8 text-center">
+            No research projects to show yet.
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {filtered.map((p) => (
             <div
-              key={p.title}
-              className={`bg-surface border border-border ${p.border} border-l-4 rounded-xl p-4`}
+              key={p._id}
+              className={`bg-surface border border-border ${
+                borderStyles[p.status || ""] || "border-l-[#6B7280]"
+              } border-l-4 rounded-xl p-4`}
             >
-              <div className="font-bold text-sm text-ink mb-2">
-                {p.title}
-              </div>
-              <span
-                className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${p.statusColor}`}
-              >
-                {p.status}
-              </span>
+              <div className="font-bold text-sm text-ink mb-2">{p.title}</div>
+              {p.status && (
+                <span
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                    statusStyles[p.status] || "bg-[#E5E5E0] text-body"
+                  }`}
+                >
+                  {p.status}
+                </span>
+              )}
             </div>
           ))}
         </div>

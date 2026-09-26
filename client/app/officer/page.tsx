@@ -29,10 +29,12 @@ export default function OfficerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [assigning, setAssigning] = useState<string | null>(null);
-    const [matchSuggestions, setMatchSuggestions] = useState
+  const [matchSuggestions, setMatchSuggestions] = useState<
     Record<string, { name: string; matchPercent: number; reason: string }[]>
   >({});
   const [matching, setMatching] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
   useEffect(() => {
     const user = getStoredUser();
@@ -160,6 +162,26 @@ export default function OfficerDashboard() {
             )
           )}
         </div>
+	<div className="flex gap-3 mb-4">
+          <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by title or researcher..."
+            className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal"
+          />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-lg border border-border px-3 py-2 text-sm bg-surface"
+          >
+            <option value="All">All statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Accepted">Accepted</option>
+            <option value="Revision Needed">Revision Needed</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
 
         {loading && <p className="text-sm text-muted">Loading...</p>}
         {error && (
@@ -169,7 +191,14 @@ export default function OfficerDashboard() {
         )}
 
         <div className="space-y-3">
-          {proposals.map((p) => (
+        {proposals
+          .filter(
+            (p) =>
+              (statusFilter === "All" || p.status === statusFilter) &&
+              (p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.researcher?.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+          )
+          .map((p) => (
             <div
               key={p._id}
               className="bg-surface border border-border rounded-xl px-5 py-4"

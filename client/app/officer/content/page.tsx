@@ -16,6 +16,7 @@ const tabs = [
   { key: "event", label: "Events" },
   { key: "news", label: "News" },
   { key: "publication", label: "Publications" },
+  { key: "research", label: "Research" },
 ];
 
 export default function ContentManagementPage() {
@@ -31,6 +32,8 @@ export default function ContentManagementPage() {
   const [location, setLocation] = useState("");
   const [authors, setAuthors] = useState("");
   const [year, setYear] = useState("");
+  const [category, setCategory] = useState("");
+  const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -61,6 +64,8 @@ export default function ContentManagementPage() {
     setLocation("");
     setAuthors("");
     setYear("");
+    setCategory("");
+    setStatus("");
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -77,6 +82,8 @@ export default function ContentManagementPage() {
       if (activeType === "event" && location) payload.location = location;
       if (activeType === "publication" && authors) payload.authors = authors;
       if (activeType === "publication" && year) payload.year = year;
+      if (activeType === "research" && category) payload.category = category;
+      if (activeType === "research" && status) payload.status = status;
 
       const newItem = await createContent(payload, token);
       setItems((prev) => [newItem, ...prev]);
@@ -180,6 +187,30 @@ export default function ContentManagementPage() {
                 placeholder="Year"
                 className="rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal"
               />
+            </div>
+          )}
+          {activeType === "research" && (
+            <div className="grid grid-cols-2 gap-3">
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="rounded-lg border border-border px-3 py-2 text-sm bg-surface"
+              >
+                <option value="">Category</option>
+                <option value="ICT">ICT</option>
+                <option value="Environment">Environment</option>
+                <option value="Health">Health</option>
+              </select>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="rounded-lg border border-border px-3 py-2 text-sm bg-surface"
+              >
+                <option value="">Status</option>
+                <option value="Ongoing">Ongoing</option>
+                <option value="Funded">Funded</option>
+                <option value="Completed">Completed</option>
+              </select>
             </div>
           )}
           <button
