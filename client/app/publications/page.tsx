@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -40,14 +41,15 @@ export default function PublicationsPage() {
               <span>Year</span>
             </div>
             {publications.map((pub) => (
-              <div
+              <Link
                 key={pub._id}
-                className="grid grid-cols-[2fr_1fr_0.6fr] px-4 py-3.5 text-sm font-medium text-ink border-t border-border items-center"
+                href={`/events/${pub._id}`}
+                className="grid grid-cols-[2fr_1fr_0.6fr] px-4 py-3.5 text-sm font-medium text-ink border-t border-border items-center hover:bg-teal-tint transition-colors"
               >
                 <span>{pub.title}</span>
                 <span className="text-body">{pub.authors || "—"}</span>
                 <span className="text-body">{pub.year || "—"}</span>
-              </div>
+              </Link>
             ))}
           </div>
         )}

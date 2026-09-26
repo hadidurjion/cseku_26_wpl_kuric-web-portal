@@ -11,11 +11,27 @@ const notificationRoutes = require('./routes/notifications');
 const settingsRoutes = require('./routes/settings');
 const aiRoutes = require('./routes/ai');
 const officerRoutes = require('./routes/officer');
+const inquiryRoutes = require('./routes/inquiries');
+const fundingRoutes = require('./routes/funding');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+const path = require('path');
+
+app.get('/api/files/:filename', (req, res) => {
+  const filePath = path.join(__dirname, 'uploads', req.params.filename);
+  res.download(filePath, (err) => {
+    if (err) {
+      console.error('File download error:', err.message);
+      if (!res.headersSent) {
+        res.status(404).json({ message: 'File not found' });
+      }
+    }
+  });
+});
+
 app.use('/uploads', express.static('uploads'));
 
 app.use('/api/auth', authRoutes);
@@ -26,6 +42,8 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/officer', officerRoutes);
+app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/funding', fundingRoutes);
 
 app.get('/', (req, res) => {
   res.send('KURIC API is running');

@@ -4,6 +4,8 @@ const path = require('path');
 const router = express.Router();
 const Proposal = require('../models/Proposal');
 const authMiddleware = require('../middleware/authMiddleware');
+const Notification = require('../models/Notification');
+const User = require('../models/User');
 
 // Multer setup — files saved to /uploads folder
 const storage = multer.diskStorage({
@@ -56,6 +58,15 @@ router.post(
         status: isDraft === 'true' ? 'Draft' : 'Pending',
         researcher: req.user.id,
       });
+     // Notify all officers about the new proposal
+    const officers = await User.find({ role: 'officer' });
+    await Notification.insertMany(
+      officers.map((o) => ({
+        user: o._id,
+        message: `New proposal submitted: "${proposal.title}"`,
+        link: `/officer`,
+      }))
+    );
 
       res.status(201).json({ message: 'Proposal saved', proposal });
     } catch (err) {
@@ -102,6 +113,14 @@ router.post('/:id/appeal', authMiddleware, async (req, res) => {
 
     proposal.appealText = appealText;
     proposal.appealStatus = 'Pending Appeal';
+    const officers = await User.find({ role: 'officer' });
+    await Notification.insertMany(
+      officers.map((o) => ({
+        user: o._id,
+        message: `New appeal submitted for "${proposal.title}"`,
+        link: `/officer/appeals`,
+      }))
+    );
     await proposal.save();
 
     res.json({ message: 'Appeal submitted', proposal });

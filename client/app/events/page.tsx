@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -59,9 +60,10 @@ export default function EventsPage() {
             {events.map((ev) => {
               const date = ev.date ? new Date(ev.date) : null;
               return (
-                <div
+                <Link
                   key={ev._id}
-                  className="flex gap-4 items-center bg-surface border border-border border-l-4 border-l-teal rounded-xl px-4 py-3.5"
+                  href={`/events/${ev._id}`}
+                  className="flex gap-4 items-center bg-surface border border-border border-l-4 border-l-teal rounded-xl px-4 py-3.5 hover:border-teal transition-colors"
                 >
                   {date && (
                     <div className="text-center w-11 flex-shrink-0">
@@ -81,7 +83,7 @@ export default function EventsPage() {
                       {ev.location || ev.description}
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -95,15 +97,16 @@ export default function EventsPage() {
               </div>
             )}
             {news.map((item) => (
-              <div
+              <Link
                 key={item._id}
-                className="bg-surface border border-border border-l-4 border-l-gold rounded-xl px-4 py-3.5"
+                href={`/events/${item._id}`}
+                className="block bg-surface border border-border border-l-4 border-l-gold rounded-xl px-4 py-3.5 hover:border-gold transition-colors"
               >
                 <div className="font-bold text-sm text-ink">{item.title}</div>
                 <div className="text-xs text-muted font-medium mt-1">
                   {item.description}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

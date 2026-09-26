@@ -72,4 +72,17 @@ router.get('/search/:query', async (req, res) => {
     res.status(500).json({ message: 'Server error searching content' });
   }
 });
+// GET a single content item by id (public)
+router.get('/item/:id', async (req, res) => {
+  try {
+    const item = await Content.findById(req.params.id);
+    if (!item) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+    res.json({ item });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error fetching item' });
+  }
+});
 module.exports = router;

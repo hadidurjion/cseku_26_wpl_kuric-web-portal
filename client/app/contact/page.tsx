@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getHomepageSettings, HomepageSettings } from "@/lib/api";
+import { getHomepageSettings, submitInquiry, HomepageSettings } from "@/lib/api";
 
 export default function ContactPage() {
   const [settings, setSettings] = useState<HomepageSettings | null>(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getHomepageSettings().then(setSettings).catch(() => {});
@@ -20,9 +22,18 @@ export default function ContactPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
+    setError("");
+    setSubmitting(true);
+    try {
+      await submitInquiry(form);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send message");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -75,19 +86,32 @@ export default function ContactPage() {
                 className="w-full h-24 border-[1.5px] border-[#C9C2AE] rounded-lg px-3 py-2.5 text-sm mb-4 outline-none focus:border-teal resize-none"
               />
 
+              {error && (
+                <p className="text-xs text-danger mb-2">{error}</p>
+              )}
+
               <button
                 type="submit"
-                className="bg-teal hover:bg-teal-dark text-white rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors"
+                disabled={submitting}
+                className="bg-teal hover:bg-teal-dark text-white rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60"
               >
-                Send message
+                {submitting ? "Sending..." : "Send message"}
               </button>
             </form>
           )}
         </div>
 
         <div className="px-10 py-9 bg-teal-tint">
-          <div className="h-28 bg-surface rounded-xl border border-border mb-4 flex items-center justify-center text-xs text-muted">
-            Map placeholder
+          <div className="h-48 rounded-xl overflow-hidden border border-border mb-4">
+            <iframe
+              src="https://www.google.com/maps?q=Khulna+University,+Khulna,+Bangladesh&output=embed"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="KURIC location map"
+            />
           </div>
           <div className="text-sm text-ink font-medium leading-loose">
             {settings?.contactAddress || "Khulna University, Khulna 9208"}

@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { loginUser } from "@/lib/api";
 
 export default function LoginPage() {
@@ -36,12 +36,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg px-4">
       <div className="w-full max-w-md bg-surface border border-border rounded-2xl shadow-sm p-8">
-        <div className="flex items-center gap-2 mb-6">
+        <Link href="/" className="flex items-center gap-2 mb-6">
           <div className="w-7 h-7 rounded-md bg-teal" />
           <span className="font-serif-brand font-bold text-lg text-ink">
             KURIC
           </span>
-        </div>
+        </Link>
 
         <h1 className="font-serif-brand text-2xl font-bold text-teal-dark mb-1">
           Welcome back
@@ -56,7 +56,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <div>
             <label className="block text-sm font-medium text-ink mb-1">
               Email
@@ -67,6 +67,7 @@ export default function LoginPage() {
               required
               value={form.email}
               onChange={handleChange}
+	      autoComplete="new-email"
               className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
               placeholder="you@ku.ac.bd"
             />
@@ -82,11 +83,12 @@ export default function LoginPage() {
               required
               value={form.password}
               onChange={handleChange}
+              autoComplete="new-password"
               className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
               placeholder="Your password"
             />
           </div>
-	  <div className="text-right -mt-2">
+          <div className="text-right -mt-2">
             <Link
               href="/forgot-password"
               className="text-xs text-teal-dark font-semibold"

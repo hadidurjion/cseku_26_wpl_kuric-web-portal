@@ -60,7 +60,7 @@ export default function RegisterPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off"> 
           <div>
             <label className="block text-sm font-medium text-ink mb-1">
               Full Name
@@ -81,6 +81,7 @@ export default function RegisterPage() {
               Email
             </label>
             <input
+              autoComplete="new-email"
               name="email"
               type="email"
               required
@@ -96,6 +97,7 @@ export default function RegisterPage() {
               Password
             </label>
             <input
+	      autoComplete="new-password"
               name="password"
               type="password"
               required

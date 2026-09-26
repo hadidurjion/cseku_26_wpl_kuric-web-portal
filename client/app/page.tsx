@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -107,9 +108,10 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {items.map((item) => (
-              <div
+              <Link
                 key={item._id}
-                className={`bg-surface border border-border ${item.border} border-l-4 rounded-lg p-4`}
+                href={`/events/${item._id}`}
+                className={`bg-surface border border-border ${item.border} border-l-4 rounded-lg p-4 hover:shadow-md transition-shadow`}
               >
                 <div className={`text-[11px] tracking-wide uppercase font-bold mb-2 ${item.tagColor}`}>
                   {item.tagLabel}
@@ -120,7 +122,7 @@ export default function HomePage() {
                 <div className="text-xs text-muted font-medium">
                   {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ""}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
