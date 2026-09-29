@@ -103,8 +103,11 @@ export async function getAssignedProposals(token: string) {
     const res = await fetch(`${API_BASE}/reviews/assigned`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch assigned proposals");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch assigned proposals");
     return data.proposals as ProposalSummary[];
   } catch (error) {
     console.error("getAssignedProposals error:", error);
@@ -164,8 +167,11 @@ export async function getAllProposals(token: string) {
     const res = await fetch(`${API_BASE}/reviews/all-proposals`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch proposals");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch proposals");
     return data.proposals as OfficerProposal[];
   } catch (error) {
     console.error("getAllProposals error:", error);
@@ -178,8 +184,11 @@ export async function getReviewers(token: string) {
     const res = await fetch(`${API_BASE}/reviews/reviewers`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch reviewers");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch reviewers");
     return data.reviewers as Reviewer[];
   } catch (error) {
     console.error("getReviewers error:", error);
@@ -223,8 +232,11 @@ export interface ContentItem {
 export async function getContent(type: string) {
   try {
     const res = await fetch(`${API_BASE}/content?type=${type}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch content");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch content");
     return (data.items || []) as ContentItem[];
   } catch (error) {
     console.error(`getContent error for type ${type}:`, error);
@@ -280,8 +292,11 @@ export async function getNotifications(token: string) {
     const res = await fetch(`${API_BASE}/notifications`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch notifications");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch notifications");
     return data as { notifications: NotificationItem[]; unreadCount: number };
   } catch (error) {
     console.error("getNotifications error:", error);
@@ -330,8 +345,11 @@ export async function getMyProposalDetail(id: string, token: string) {
     const res = await fetch(`${API_BASE}/proposals/mine`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch");
     return (data.proposals as ProposalDetail[]).find((p) => p._id === id);
   } catch (error) {
     console.error("getMyProposalDetail error:", error);
@@ -353,8 +371,11 @@ export async function getAllUsers(token: string) {
     const res = await fetch(`${API_BASE}/reviews/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch users");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch users");
     return data.users as ManagedUser[];
   } catch (error) {
     console.error("getAllUsers error:", error);
@@ -438,8 +459,11 @@ export async function getPendingAppeals(token: string) {
     const res = await fetch(`${API_BASE}/reviews/appeals`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch appeals");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch appeals");
     return data.proposals as AppealProposal[];
   } catch (error) {
     console.error("getPendingAppeals error:", error);
@@ -618,8 +642,11 @@ export async function adminResetPassword(
 export async function searchContent(query: string) {
   try {
     const res = await fetch(`${API_BASE}/content/search/${encodeURIComponent(query)}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Search failed");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Search failed");
     return (data.items || []) as ContentItem[];
   } catch (error) {
     console.error("searchContent error:", error);
@@ -652,8 +679,11 @@ export async function getInquiries(token: string) {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch inquiries");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch inquiries");
     return (data.inquiries || []) as Inquiry[];
   } catch (error) {
     console.error("getInquiries error:", error);
@@ -711,8 +741,11 @@ export async function getEligibleProposals(token: string) {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch");
     return data.proposals || [];
   } catch (error) {
     console.error("getEligibleProposals error:", error);
@@ -749,8 +782,11 @@ export async function getAllFundedProjects(token: string) {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch");
     return (data.projects || []) as FundedProject[];
   } catch (error) {
     console.error("getAllFundedProjects error:", error);
@@ -778,8 +814,11 @@ export async function getMyFundedProjects(token: string) {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch");
     return (data.projects || []) as FundedProject[];
   } catch (error) {
     console.error("getMyFundedProjects error:", error);
