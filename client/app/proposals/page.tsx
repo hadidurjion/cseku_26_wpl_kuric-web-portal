@@ -18,6 +18,7 @@ interface Proposal {
   reviewDecision?: string | null;
   appealStatus?: string;
 }
+
 const statusStyles: Record<string, string> = {
   Draft: "bg-[#EFEBE0] text-muted",
   Pending: "bg-gold-tint text-gold-dark",
@@ -34,6 +35,7 @@ export default function ProposalsListPage() {
   const [error, setError] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState(""); 
 
   useEffect(() => {
     const user = getStoredUser();
@@ -92,122 +94,138 @@ export default function ProposalsListPage() {
         )}
 
         <div className="space-y-3">
-	        <div className="flex gap-2 mb-4">
-          {["All", "Pending", "Under Review", "Accepted", "Revision Needed", "Rejected"].map(
-            (s) => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  statusFilter === s
-                    ? "bg-teal text-white"
-                    : "border-[1.5px] border-[#C9C2AE] text-body"
-                }`}
-              >
-                {s}
-              </button>
-            )
-          )}
-        </div>
-         {proposals
-          .filter((p) => statusFilter === "All" || p.status === statusFilter)
-          .map((p) => (
-            <div
-              key={p._id}
-              className="bg-surface border border-border rounded-xl px-5 py-4"
-            >
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() =>
-                  setExpandedId(expandedId === p._id ? null : p._id)
-                }
-              >
-                <div>
-                  <div className="text-sm font-semibold text-ink mb-1">
-                    {p.title}
-                  </div>
-                  <div className="text-xs text-muted">
-                    Submitted {new Date(p.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-                <span
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
-                    statusStyles[p.status] || "bg-[#EFEBE0] text-muted"
+          {/* Search Input Filter Buttons এর উপরে বসানো হয়েছে */}
+          <input 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            placeholder="Search your proposals..." 
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal mb-3" 
+          />
+
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+            {["All", "Pending", "Under Review", "Accepted", "Revision Needed", "Rejected"].map(
+              (s) => (
+                <button
+                  key={s}
+                  onClick={() => setStatusFilter(s)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    statusFilter === s
+                      ? "bg-teal text-white"
+                      : "border-[1.5px] border-[#C9C2AE] text-body"
                   }`}
                 >
-                  {p.status}
-                </span>
-              </div>
-	                 {expandedId === p._id && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <div className="text-xs font-bold text-muted uppercase tracking-wide mb-2">
-                    History
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 rounded-full bg-teal" />
-                      <span className="text-ink font-medium">Submitted</span>
-                      <span className="text-muted">
-                        {new Date(p.createdAt).toLocaleString()}
-                      </span>
-                    </div>
-                    {p.reviewedAt && (
-                      <div className="flex items-center gap-2 text-xs">
-                        <div className="w-2 h-2 rounded-full bg-gold" />
-                        <span className="text-ink font-medium">
-                          Reviewed — {p.reviewDecision || p.status}
-                        </span>
-                        <span className="text-muted">
-                          {new Date(p.reviewedAt).toLocaleString()}
-                        </span>
-                      </div>
-                    )}
-                    {p.appealStatus && p.appealStatus !== "None" && (
-                      <div className="flex items-center gap-2 text-xs">
-                        <div className="w-2 h-2 rounded-full bg-danger" />
-                        <span className="text-ink font-medium">
-                          Appeal — {p.appealStatus}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )} 
-              {expandedId === p._id && p.reviewComment && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <div className="text-xs font-bold text-muted uppercase tracking-wide mb-1.5">
-                    Reviewer feedback
-                  </div>
-                  <p className="text-sm text-ink leading-relaxed mb-3">
-                    {p.reviewComment}
-                  </p>
+                  {s}
+                </button>
+              )
+            )}
+          </div>
 
-                  {p.status === "Revision Needed" && (
-                    <Link
-                      href={`/proposals/${p._id}/revise`}
-                      className="inline-block bg-teal hover:bg-teal-dark text-white text-xs font-semibold rounded-lg px-3.5 py-2 transition-colors"
-                    >
-                      Revise &amp; Resubmit
-                    </Link>
-                  )}
-		                  {p.status === "Rejected" &&
-                    (!p.appealStatus || p.appealStatus === "None") && (
+          {/* Filter logic ঠিক করে সঠিক Precedence অনুযায়ী ব্র্যাকেট দেওয়া হয়েছে */}
+          {proposals
+            .filter(
+              (p) =>
+                (statusFilter === "All" || p.status === statusFilter) &&
+                p.title.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map((p) => (
+              <div
+                key={p._id}
+                className="bg-surface border border-border rounded-xl px-5 py-4"
+              >
+                <div
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() =>
+                    setExpandedId(expandedId === p._id ? null : p._id)
+                  }
+                >
+                  <div>
+                    <div className="text-sm font-semibold text-ink mb-1">
+                      {p.title}
+                    </div>
+                    <div className="text-xs text-muted">
+                      Submitted {new Date(p.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <span
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
+                      statusStyles[p.status] || "bg-[#EFEBE0] text-muted"
+                    }`}
+                  >
+                    {p.status}
+                  </span>
+                </div>
+
+                {expandedId === p._id && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <div className="text-xs font-bold text-muted uppercase tracking-wide mb-2">
+                      History
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs">
+                        <div className="w-2 h-2 rounded-full bg-teal" />
+                        <span className="text-ink font-medium">Submitted</span>
+                        <span className="text-muted">
+                          {new Date(p.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      {p.reviewedAt && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <div className="w-2 h-2 rounded-full bg-gold" />
+                          <span className="text-ink font-medium">
+                            Reviewed — {p.reviewDecision || p.status}
+                          </span>
+                          <span className="text-muted">
+                            {new Date(p.reviewedAt).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      {p.appealStatus && p.appealStatus !== "None" && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <div className="w-2 h-2 rounded-full bg-danger" />
+                          <span className="text-ink font-medium">
+                            Appeal — {p.appealStatus}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )} 
+
+                {expandedId === p._id && p.reviewComment && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <div className="text-xs font-bold text-muted uppercase tracking-wide mb-1.5">
+                      Reviewer feedback
+                    </div>
+                    <p className="text-sm text-ink leading-relaxed mb-3">
+                      {p.reviewComment}
+                    </p>
+
+                    {p.status === "Revision Needed" && (
                       <Link
-                        href={`/proposals/${p._id}/appeal`}
-                        className="inline-block bg-surface border-[1.5px] border-danger text-danger text-xs font-semibold rounded-lg px-3.5 py-2 transition-colors"
+                        href={`/proposals/${p._id}/revise`}
+                        className="inline-block bg-teal hover:bg-teal-dark text-white text-xs font-semibold rounded-lg px-3.5 py-2 transition-colors"
                       >
-                        Appeal this decision
+                        Revise &amp; Resubmit
                       </Link>
                     )}
-                  {p.appealStatus === "Pending Appeal" && (
-                    <span className="text-xs text-gold-dark font-semibold">
-                      Appeal submitted — pending review
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+                    {p.status === "Rejected" &&
+                      (!p.appealStatus || p.appealStatus === "None") && (
+                        <Link
+                          href={`/proposals/${p._id}/appeal`}
+                          className="inline-block bg-surface border-[1.5px] border-danger text-danger text-xs font-semibold rounded-lg px-3.5 py-2 transition-colors"
+                        >
+                          Appeal this decision
+                        </Link>
+                      )}
+                    {p.appealStatus === "Pending Appeal" && (
+                      <span className="text-xs text-gold-dark font-semibold">
+                        Appeal submitted — pending review
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
         </div>
       </div>
 

@@ -1,5 +1,22 @@
 const mongoose = require('mongoose');
 
+const installmentSchema = new mongoose.Schema({
+  label: { type: String, required: true },
+  percent: { type: Number, required: true },
+  amount: { type: Number, default: 0 },
+  dueMonths: { type: Number, default: 0 },
+  reportRequired: { type: Boolean, default: true },
+  status: {
+    type: String,
+    enum: ['Pending', 'Report Submitted', 'Released'],
+    default: 'Pending',
+  },
+  reportText: { type: String, default: '' },
+  reportFile: { type: String, default: '' },
+  submittedAt: { type: Date, default: null },
+  releasedAt: { type: Date, default: null },
+}, { _id: true });
+
 const fundedProjectSchema = new mongoose.Schema({
   proposal: {
     type: mongoose.Schema.Types.ObjectId,
@@ -20,62 +37,7 @@ const fundedProjectSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  initialPercent: {
-    type: Number,
-    default: 50,
-  },
-  initialDisbursed: {
-    type: Number,
-    default: 0,
-  },
-  sixMonthDisbursed: {
-    type: Number,
-    default: 0,
-  },
-  disbursementStatus: {
-    type: String,
-    enum: [
-      'Initial Released',
-      'Awaiting 6-month Report',
-      '6-month Approved',
-      'Fully Disbursed',
-    ],
-    default: 'Initial Released',
-  },
-  sixMonthReportText: {
-    type: String,
-    default: '',
-  },
-  sixMonthReportFile: {
-    type: String,
-    default: '',
-  },
-  sixMonthReportStatus: {
-    type: String,
-    enum: ['Not Submitted', 'Submitted', 'Approved'],
-    default: 'Not Submitted',
-  },
-  sixMonthSubmittedAt: {
-    type: Date,
-    default: null,
-  },
-  oneYearReportText: {
-    type: String,
-    default: '',
-  },
-  oneYearReportFile: {
-    type: String,
-    default: '',
-  },
-  oneYearReportStatus: {
-    type: String,
-    enum: ['Not Submitted', 'Submitted', 'Approved'],
-    default: 'Not Submitted',
-  },
-  oneYearSubmittedAt: {
-    type: Date,
-    default: null,
-  },
+  installments: [installmentSchema],
   publicationStatus: {
     type: String,
     enum: ['Not Published', 'Under Review', 'Published'],
