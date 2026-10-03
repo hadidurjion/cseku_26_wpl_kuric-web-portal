@@ -7,12 +7,18 @@ import Footer from "@/components/Footer";
 import { getToken, getStoredUser } from "@/lib/auth";
 import {
   getFundedProject,
-  approveSixMonth,
-  approveOneYear,
+  releaseInstallment,
+  addInstallment,
   updatePublication,
   updateFundingAmount,
   FundedProject,
 } from "@/lib/api";
+
+const statusStyles: Record<string, string> = {
+  Pending: "bg-[#EFEBE0] text-muted",
+  "Report Submitted": "bg-gold-tint text-gold-dark",
+  Released: "bg-teal-tint text-teal-dark",
+};
 
 export default function FundingDetailPage() {
   const router = useRouter();
@@ -29,6 +35,12 @@ export default function FundingDetailPage() {
   const [journalName, setJournalName] = useState("");
   const [pubLink, setPubLink] = useState("");
   const [newAmount, setNewAmount] = useState("");
+
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newLabel, setNewLabel] = useState("");
+  const [newPercent, setNewPercent] = useState("");
+  const [newDueMonths, setNewDueMonths] = useState("");
+  const [newReportRequired, setNewReportRequired] = useState(true);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -57,14 +69,14 @@ export default function FundingDetailPage() {
       .finally(() => setLoading(false));
   }
 
-  async function handleApproveSixMonth() {
+  async function handleRelease(installmentId: string) {
     const token = getToken();
     if (!token) return;
     setWorking(true);
     setError("");
     try {
-      await approveSixMonth(id, token);
-      setSuccessMsg("6-month report approved, remaining funds released.");
+      await releaseInstallment(id, installmentId, token);
+      setSuccessMsg("Installment released.");
       load(token);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed");
@@ -73,14 +85,28 @@ export default function FundingDetailPage() {
     }
   }
 
-  async function handleApproveOneYear() {
+  async function handleAddInstallment(e: React.FormEvent) {
+    e.preventDefault();
     const token = getToken();
-    if (!token) return;
+    if (!token || !newLabel || !newPercent) return;
     setWorking(true);
     setError("");
     try {
-      await approveOneYear(id, token);
-      setSuccessMsg("1-year report approved, project marked complete.");
+      await addInstallment(
+        id,
+        {
+          label: newLabel,
+          percent: Number(newPercent),
+          dueMonths: Number(newDueMonths) || 0,
+          reportRequired: newReportRequired,
+        },
+        token
+      );
+      setSuccessMsg("Installment added.");
+      setShowAddForm(false);
+      setNewLabel("");
+      setNewPercent("");
+      setNewDueMonths("");
       load(token);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed");
@@ -169,36 +195,11 @@ export default function FundingDetailPage() {
           </div>
         )}
 
-        {/* Disbursement overview */}
         <div className="bg-surface border border-border rounded-xl p-5 mb-5">
           <div className="text-xs font-bold text-muted uppercase tracking-wide mb-3">
-            Disbursement
+            Total Amount
           </div>
-          <div className="grid grid-cols-3 gap-3 mb-3">
-            <div>
-              <div className="text-xs text-muted">Total</div>
-              <div className="font-serif-brand text-lg font-bold text-teal-dark">
-                ৳{project.totalAmount.toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted">Initial released</div>
-              <div className="font-serif-brand text-lg font-bold text-teal-dark">
-                ৳{project.initialDisbursed.toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted">6-month released</div>
-              <div className="font-serif-brand text-lg font-bold text-teal-dark">
-                ৳{project.sixMonthDisbursed.toLocaleString()}
-              </div>
-            </div>
-          </div>
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gold-tint text-gold-dark">
-            {project.disbursementStatus}
-          </span>
-
-          <form onSubmit={handleAmountSave} className="flex gap-2 mt-4 pt-4 border-t border-border">
+          <form onSubmit={handleAmountSave} className="flex gap-2">
             <input
               type="number"
               value={newAmount}
@@ -210,88 +211,112 @@ export default function FundingDetailPage() {
               disabled={working}
               className="bg-surface border-[1.5px] border-[#C9C2AE] text-ink text-xs font-semibold rounded-lg px-3.5 py-2 disabled:opacity-60"
             >
-              Update total amount
+              Update
             </button>
           </form>
         </div>
 
-        {/* 6-month report */}
         <div className="bg-surface border border-border rounded-xl p-5 mb-5">
           <div className="flex justify-between items-center mb-3">
             <div className="text-xs font-bold text-muted uppercase tracking-wide">
-              6-month Report
+              Installments
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#EFEBE0] text-muted">
-              {project.sixMonthReportStatus}
-            </span>
+            <button
+              onClick={() => setShowAddForm((v) => !v)}
+              className="text-xs font-semibold text-teal-dark"
+            >
+              {showAddForm ? "Cancel" : "+ Add installment"}
+            </button>
           </div>
-          {project.sixMonthReportText ? (
-            <>
-              <p className="text-sm text-ink mb-3">{project.sixMonthReportText}</p>
-              {project.sixMonthReportFile && (
-                <a
-                  href={"http://localhost:5000/api/files/" + encodeURIComponent(project.sixMonthReportFile)}
-                  rel="noopener noreferrer"
-                  download
-                  className="flex items-center gap-2 text-sm text-teal-dark font-semibold hover:underline block mb-3"
-                >
-                  📎 View attached file
-                </a>
-              )}
-              {project.sixMonthReportStatus === "Submitted" && (
-                <button
-                  onClick={handleApproveSixMonth}
-                  disabled={working}
-                  className="bg-teal hover:bg-teal-dark text-white text-xs font-semibold rounded-lg px-4 py-2 transition-colors disabled:opacity-60"
-                >
-                  Approve &amp; release remaining funds
-                </button>
-              )}
-            </>
-          ) : (
-            <p className="text-sm text-muted">Not submitted yet.</p>
+
+          {showAddForm && (
+            <form
+              onSubmit={handleAddInstallment}
+              className="grid grid-cols-[2fr_1fr_1fr_auto] gap-2 items-center mb-4 pb-4 border-b border-border"
+            >
+              <input
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                placeholder="Label"
+                className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal"
+              />
+              <input
+                type="number"
+                value={newPercent}
+                onChange={(e) => setNewPercent(e.target.value)}
+                placeholder="%"
+                className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal"
+              />
+              <input
+                type="number"
+                value={newDueMonths}
+                onChange={(e) => setNewDueMonths(e.target.value)}
+                placeholder="Due (mo)"
+                className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal"
+              />
+              <button
+                type="submit"
+                disabled={working}
+                className="bg-teal text-white text-xs font-semibold rounded-lg px-3 py-2"
+              >
+                Add
+              </button>
+            </form>
           )}
+
+          <div className="space-y-3">
+            {project.installments.map((inst) => (
+              <div
+                key={inst._id}
+                className="border border-border rounded-lg p-3"
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <div className="text-sm font-semibold text-ink">
+                    {inst.label}{" "}
+                    <span className="text-muted font-normal">
+                      ({inst.percent}% · ৳{inst.amount.toLocaleString()})
+                    </span>
+                  </div>
+                  <span
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                      statusStyles[inst.status]
+                    }`}
+                  >
+                    {inst.status}
+                  </span>
+                </div>
+                <div className="text-xs text-muted mb-2">
+                  Due at {inst.dueMonths} month(s) ·{" "}
+                  {inst.reportRequired ? "Report required" : "No report required"}
+                </div>
+
+                {inst.reportText && (
+                  <p className="text-sm text-ink mb-2">{inst.reportText}</p>
+                )}
+                {inst.reportFile && (
+                  <a
+                    href={"http://localhost:5000/api/files/" + encodeURIComponent(inst.reportFile)}
+                    className="text-sm text-teal-dark font-semibold hover:underline block mb-2"
+                  >
+                    📎 View attached file
+                  </a>
+                )}
+
+                {inst.status !== "Released" &&
+                  (!inst.reportRequired || inst.status === "Report Submitted") && (
+                    <button
+                      onClick={() => handleRelease(inst._id)}
+                      disabled={working}
+                      className="bg-teal hover:bg-teal-dark text-white text-xs font-semibold rounded-lg px-3.5 py-2 transition-colors disabled:opacity-60"
+                    >
+                      Release this installment
+                    </button>
+                  )}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* 1-year report */}
-        <div className="bg-surface border border-border rounded-xl p-5 mb-5">
-          <div className="flex justify-between items-center mb-3">
-            <div className="text-xs font-bold text-muted uppercase tracking-wide">
-              1-year Report
-            </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#EFEBE0] text-muted">
-              {project.oneYearReportStatus}
-            </span>
-          </div>
-          {project.oneYearReportText ? (
-            <>
-              <p className="text-sm text-ink mb-3">{project.oneYearReportText}</p>
-              {project.oneYearReportFile && (
-                <a 
-                  href={"http://localhost:5000/api/files/" + encodeURIComponent(project.oneYearReportFile)}
-                  rel="noopener noreferrer"
-                  download
-                  className="flex items-center gap-2 text-sm text-teal-dark font-semibold hover:underline block mb-3"
-                >
-                  📎 View attached file
-                </a>
-              )}
-              {project.oneYearReportStatus === "Submitted" && (
-                <button
-                  onClick={handleApproveOneYear}
-                  disabled={working}
-                  className="bg-teal hover:bg-teal-dark text-white text-xs font-semibold rounded-lg px-4 py-2 transition-colors disabled:opacity-60"
-                >
-                  Approve &amp; mark project complete
-                </button>
-              )}
-            </>
-          ) : (
-            <p className="text-sm text-muted">Not submitted yet.</p>
-          )}
-        </div>
-
-        {/* Publication */}
         <div className="bg-surface border border-border rounded-xl p-5">
           <div className="text-xs font-bold text-muted uppercase tracking-wide mb-3">
             Publication

@@ -20,6 +20,7 @@ export default function ReviewerDashboard() {
   const [proposals, setProposals] = useState<ProposalSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const user = getStoredUser();
@@ -39,6 +40,16 @@ export default function ReviewerDashboard() {
       .finally(() => setLoading(false));
   }, [router]);
 
+  // Search Filter Logic: Title, Researcher Name, অথবা Department দিয়ে খোঁজা যাবে
+  const filteredProposals = proposals.filter((p) => {
+    const term = searchTerm.toLowerCase();
+    const matchesTitle = p.title?.toLowerCase().includes(term);
+    const matchesResearcher = p.researcher?.name?.toLowerCase().includes(term);
+    const matchesDept = p.researcher?.department?.toLowerCase().includes(term);
+
+    return matchesTitle || matchesResearcher || matchesDept;
+  });
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -51,7 +62,16 @@ export default function ReviewerDashboard() {
           Review proposals assigned to you and record your decision.
         </p>
 
+        {/* Search Input Field */}
+        <input
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by title, researcher, or department..."
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal mb-4"
+        />
+
         {loading && <p className="text-sm text-muted">Loading...</p>}
+        
         {error && (
           <div className="rounded-lg border border-danger bg-danger-tint text-danger px-4 py-2 text-sm">
             {error}
@@ -64,8 +84,14 @@ export default function ReviewerDashboard() {
           </div>
         )}
 
+        {!loading && !error && proposals.length > 0 && filteredProposals.length === 0 && (
+          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-6 text-center">
+            No proposals found matching &quot;{searchTerm}&quot;.
+          </div>
+        )}
+
         <div className="space-y-3">
-          {proposals.map((p) => (
+          {filteredProposals.map((p) => (
             <Link
               key={p._id}
               href={`/reviewer/${p._id}`}
