@@ -30,3 +30,32 @@ body {
 .font-serif-brand {
   font-family: var(--font-fraunces), serif;
 }
+/* ---- KURIC motion helpers ---- */
+.ticker-track {
+  width: max-content;
+  animation: ticker-scroll 40s linear infinite;
+}
+.ticker-viewport:hover .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-25%); }
+}
+.float-slow {
+  animation: float-a 14s ease-in-out infinite;
+}
+.float-slow-2 {
+  animation: float-b 18s ease-in-out infinite;
+}
+@keyframes float-a {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, 20px); }
+}
+@keyframes float-b {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-25px, -20px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track, .float-slow, .float-slow-2 { animation: none; }
+}
