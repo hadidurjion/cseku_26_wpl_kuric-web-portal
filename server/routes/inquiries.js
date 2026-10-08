@@ -45,5 +45,18 @@ router.get('/', authMiddleware, requireOfficer, async (req, res) => {
     res.status(500).json({ message: 'Server error fetching inquiries' });
   }
 });
-
+router.patch('/:id/read', authMiddleware, requireOfficer, async (req, res) => {
+  try {
+    const inquiry = await Inquiry.findByIdAndUpdate(
+      req.params.id,
+      { read: true },
+      { new: true }
+    );
+    if (!inquiry) return res.status(404).json({ message: 'Not found' });
+    res.json({ message: 'Marked as read', inquiry });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 module.exports = router;

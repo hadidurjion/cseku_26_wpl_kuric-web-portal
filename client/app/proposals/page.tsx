@@ -6,6 +6,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getToken, getStoredUser } from "@/lib/auth";
+import { getFundingByProposal } from "@/lib/api";
 
 interface Proposal {
   _id: string;
@@ -94,7 +95,7 @@ export default function ProposalsListPage() {
         )}
 
         <div className="space-y-3">
-          {/* Search Input Filter Buttons এর উপরে বসানো হয়েছে */}
+          {/* Search Input */}
           <input 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
@@ -120,7 +121,6 @@ export default function ProposalsListPage() {
             )}
           </div>
 
-          {/* Filter logic ঠিক করে সঠিক Precedence অনুযায়ী ব্র্যাকেট দেওয়া হয়েছে */}
           {proposals
             .filter(
               (p) =>
@@ -221,6 +221,23 @@ export default function ProposalsListPage() {
                       <span className="text-xs text-gold-dark font-semibold">
                         Appeal submitted — pending review
                       </span>
+                    )}
+                    {p.status === "Accepted" && (
+                      <button
+                        onClick={async () => {
+                          const token = getToken();
+                          if (!token) return;
+                          try {
+                            const project = await getFundingByProposal(p._id, token);
+                            router.push(`/proposals/funded/${project._id}`);
+                          } catch {
+                            alert("Funding has not been set up for this proposal yet.");
+                          }
+                        }}
+                        className="inline-block bg-teal hover:bg-teal-dark text-white text-xs font-semibold rounded-lg px-3.5 py-2 transition-colors"
+                      >
+                        View Funding Details →
+                      </button>
                     )}
                   </div>
                 )}

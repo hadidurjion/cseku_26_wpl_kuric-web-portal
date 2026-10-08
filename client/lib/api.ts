@@ -532,8 +532,12 @@ export interface FullProfile {
   department?: string;
   designation?: string;
   bio?: string;
+  avatar?: string;
+  phone?: string;
+  researchInterests?: string;
+  expertise?: string;
+  profileLink?: string;
 }
-
 export async function getMyProfile(token: string) {
   try {
     const res = await fetch(`${API_BASE}/auth/me`, {
@@ -548,7 +552,7 @@ export async function getMyProfile(token: string) {
 }
 
 export async function updateMyProfile(
-  payload: { name?: string; department?: string; bio?: string },
+  payload: Partial<FullProfile>,
   token: string
 ) {
   try {
@@ -859,4 +863,50 @@ export async function updateFundingAmount(id: string, totalAmount: number, token
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || "Failed to update");
   return data;
+}
+export async function markInquiryRead(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/inquiries/${id}/read`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed");
+  return data;
+}
+
+export async function getFundingByProposal(proposalId: string, token: string) {
+  const res = await fetch(`${API_BASE}/funding/by-proposal/${proposalId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Not found");
+  return data.project as FundedProject;
+}
+export interface PublicStats {
+  totalProposals: number;
+  underReview: number;
+  accepted: number;
+  activeProjects: number;
+  publications: number;
+  fundedAmount: number;
+}
+
+export async function getPublicStats() {
+  const res = await fetch(`${API_BASE}/settings/stats`, { cache: "no-store" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch stats");
+  return data as PublicStats;
+}
+export async function uploadAvatar(file: File, token: string) {
+  const fd = new FormData();
+  fd.append("avatar", file);
+  const res = await fetch(`${API_BASE}/auth/me/avatar`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to upload photo");
+  return data.user as FullProfile;
 }

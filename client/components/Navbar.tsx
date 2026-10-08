@@ -20,6 +20,7 @@ const menuByRole: Record<string, { label: string; href: string }[]> = {
   researcher: [
     { label: "My Proposals", href: "/proposals" },
     { label: "Submit Proposal", href: "/proposals/new" },
+    { label: "My Funded Projects", href: "/proposals/funded" },
     { label: "Profile", href: "/profile" },
   ],
   reviewer: [
@@ -35,8 +36,8 @@ const menuByRole: Record<string, { label: string; href: string }[]> = {
     { label: "AI Reports", href: "/officer/reports" },
     { label: "Homepage Settings", href: "/officer/settings" },
     { label: "Profile", href: "/profile" },
-    { label: "Funded Projects", href: "/officer/funding" },
-    { label: "Funded Projects", href: "/proposals/funded" },
+    { label: "Manage Funding", href: "/officer/funding" },
+    { label: "My Funded Projects", href: "/proposals/funded" },
   ],
 };
 

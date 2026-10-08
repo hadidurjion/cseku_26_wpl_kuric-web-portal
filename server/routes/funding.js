@@ -290,5 +290,24 @@ router.patch('/:id/amount', authMiddleware, requireOfficer, async (req, res) => 
     res.status(500).json({ message: 'Server error updating amount' });
   }
 });
+// GET funded project by proposal id (for researcher's "View Funding" link)
+router.get('/by-proposal/:proposalId', authMiddleware, async (req, res) => {
+  try {
+    const project = await FundedProject.findOne({ proposal: req.params.proposalId });
+    if (!project) {
+      return res.status(404).json({ message: 'No funding found for this proposal' });
+    }
+    if (
+      req.user.role !== 'officer' &&
+      project.researcher.toString() !== req.user.id
+    ) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+    res.json({ project });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 module.exports = router;

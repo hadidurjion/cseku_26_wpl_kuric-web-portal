@@ -1,31 +1,42 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getHomepageSettings, getContent, HomepageSettings, ContentItem } from "@/lib/api";
+import {
+  getHomepageSettings,
+  getContent,
+  getPublicStats,
+  HomepageSettings,
+  ContentItem,
+  PublicStats,
+} from "@/lib/api";
 
-const defaultSettings: HomepageSettings = {
-  tagline: "Where proposals become projects.",
-  activeProjectsCount: "128",
-  publicationsCount: "340",
-  fundedAmount: "৳4.2Cr",
+type TaggedItem = ContentItem & {
+  tagLabel: string;
+  tagColor: string;
+  border: string;
+  createdAt?: string;
 };
 
 export default function HomePage() {
-  const [settings, setSettings] = useState<HomepageSettings>(defaultSettings);
-  const [items, setItems] = useState<ContentItem[]>([]);
+  const [tagline, setTagline] = useState("Where proposals become projects.");
+  const [stats, setStats] = useState<PublicStats | null>(null);
+  const [items, setItems] = useState<TaggedItem[]>([]);
 
   useEffect(() => {
-    getHomepageSettings().then(setSettings).catch(() => {});
+    getHomepageSettings()
+      .then((s: HomepageSettings) => setTagline(s.tagline))
+      .catch(() => {});
+    getPublicStats().then(setStats).catch(() => {});
 
     Promise.all([
       getContent("event"),
       getContent("news"),
       getContent("publication"),
     ]).then(([events, news, pubs]) => {
-      const tagged = [
+      const tagged: TaggedItem[] = [
         ...events.map((e) => ({ ...e, tagLabel: "Event", tagColor: "text-teal-dark", border: "border-teal" })),
         ...news.map((n) => ({ ...n, tagLabel: "News", tagColor: "text-gold-dark", border: "border-gold" })),
         ...pubs.map((p) => ({ ...p, tagLabel: "Publication", tagColor: "text-[#4B5563]", border: "border-[#6B7280]" })),
@@ -38,10 +49,12 @@ export default function HomePage() {
     });
   }, []);
 
-  const stats = [
-    { value: settings.activeProjectsCount, label: "Active projects", color: "text-teal-dark" },
-    { value: settings.publicationsCount, label: "Publications", color: "text-teal-dark" },
-    { value: settings.fundedAmount, label: "Funded to date", color: "text-gold-dark" },
+  const statCards = [
+    { value: stats?.totalProposals ?? 0, label: "Total submissions", color: "text-teal-dark" },
+    { value: stats?.underReview ?? 0, label: "Under review", color: "text-gold-dark" },
+    { value: stats?.activeProjects ?? 0, label: "Active funded projects", color: "text-teal-dark" },
+    { value: stats?.publications ?? 0, label: "Publications", color: "text-teal-dark" },
+    { value: "৳" + (stats?.fundedAmount ?? 0).toLocaleString(), label: "Funded to date", color: "text-gold-dark" },
   ];
 
   return (
@@ -50,9 +63,7 @@ export default function HomePage() {
 
       <div
         className="text-center px-10 pt-14 pb-11"
-        style={{
-          background: "radial-gradient(ellipse at 50% -10%, #DCEEE9 0%, #FAF8F3 60%)",
-        }}
+        style={{ background: "radial-gradient(ellipse at 50% -10%, #DCEEE9 0%, #FAF8F3 60%)" }}
       >
         <div className="text-[11.5px] tracking-widest uppercase text-muted font-bold mb-3.5">
           Khulna University
@@ -61,31 +72,25 @@ export default function HomePage() {
           Research and Innovation Center
         </div>
         <h1 className="font-serif-brand text-4xl md:text-5xl font-bold text-teal-dark leading-tight max-w-xl mx-auto mb-4">
-          {settings.tagline}
+          {tagline}
         </h1>
         <p className="text-sm text-body max-w-md mx-auto mb-6 leading-relaxed">
           Submit, review, and track research at Khulna University — all in one place.
         </p>
         <div className="flex gap-3 justify-center">
-          <a
-            href="/proposals/new"
-            className="bg-teal hover:bg-teal-dark text-white rounded-lg px-6 py-3 text-sm font-semibold transition-colors"
-          >
+          <Link href="/proposals/new" className="bg-teal hover:bg-teal-dark text-white rounded-lg px-6 py-3 text-sm font-semibold transition-colors">
             Submit a proposal
-          </a>
-          <a
-            href="/research"
-            className="bg-surface text-ink border-[1.5px] border-[#C9C2AE] rounded-lg px-6 py-3 text-sm font-semibold hover:bg-teal-tint transition-colors"
-          >
+          </Link>
+          <Link href="/research" className="bg-surface text-ink border-[1.5px] border-[#C9C2AE] rounded-lg px-6 py-3 text-sm font-semibold hover:bg-teal-tint transition-colors">
             Explore research
-          </a>
+          </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-px bg-border">
-        {stats.map((s) => (
-          <div key={s.label} className="bg-surface text-center py-6 px-5">
-            <div className={`font-serif-brand text-3xl font-bold ${s.color}`}>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-px bg-border">
+        {statCards.map((s) => (
+          <div key={s.label} className="bg-surface text-center py-6 px-4">
+            <div className={`font-serif-brand text-2xl md:text-3xl font-bold ${s.color}`}>
               {s.value}
             </div>
             <div className="text-xs text-body font-medium mt-0.5">{s.label}</div>
@@ -98,9 +103,9 @@ export default function HomePage() {
           <div className="font-serif-brand text-lg font-bold text-ink">
             Latest from the center
           </div>
-          <a href="/events" className="text-xs text-teal-dark font-semibold cursor-pointer">
+          <Link href="/events" className="text-xs text-teal-dark font-semibold">
             View all →
-          </a>
+          </Link>
         </div>
 
         {items.length === 0 ? (
