@@ -269,6 +269,7 @@ export function imageUrl(filename?: string) {
     ? "http://localhost:5000/uploads/" + encodeURIComponent(filename)
     : "";
 }
+
 export async function deleteContent(id: string, token: string) {
   try {
     const res = await fetch(`${API_BASE}/content/${id}`, {
@@ -298,7 +299,8 @@ export async function getNotifications(token: string) {
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || "Failed to fetch notifications");
+      console.error("Failed to fetch notifications:", data.message || res.statusText);
+      return { notifications: [], unreadCount: 0 };
     }
     const data = await res.json();
     return data as { notifications: NotificationItem[]; unreadCount: number };
@@ -542,6 +544,7 @@ export interface FullProfile {
   expertise?: string;
   profileLink?: string;
 }
+
 export async function getMyProfile(token: string) {
   try {
     const res = await fetch(`${API_BASE}/auth/me`, {
@@ -868,6 +871,7 @@ export async function updateFundingAmount(id: string, totalAmount: number, token
   if (!res.ok) throw new Error(data.message || "Failed to update");
   return data;
 }
+
 export async function markInquiryRead(id: string, token: string) {
   const res = await fetch(`${API_BASE}/inquiries/${id}/read`, {
     method: "PATCH",
@@ -887,6 +891,7 @@ export async function getFundingByProposal(proposalId: string, token: string) {
   if (!res.ok) throw new Error(data.message || "Not found");
   return data.project as FundedProject;
 }
+
 export interface PublicStats {
   totalProposals: number;
   underReview: number;
@@ -902,6 +907,7 @@ export async function getPublicStats() {
   if (!res.ok) throw new Error(data.message || "Failed to fetch stats");
   return data as PublicStats;
 }
+
 export async function uploadAvatar(file: File, token: string) {
   const fd = new FormData();
   fd.append("avatar", file);
@@ -914,6 +920,7 @@ export async function uploadAvatar(file: File, token: string) {
   if (!res.ok) throw new Error(data.message || "Failed to upload photo");
   return data.user as FullProfile;
 }
+
 export function fileUrl(filename?: string) {
   return filename
     ? "http://localhost:5000/uploads/" + encodeURIComponent(filename)

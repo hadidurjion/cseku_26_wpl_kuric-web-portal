@@ -28,19 +28,18 @@ const menuByRole: Record<string, { label: string; href: string }[]> = {
     { label: "Assigned Proposals", href: "/reviewer" },
     { label: "Profile", href: "/profile" },
   ],
-    officer: [
+  officer: [
     { label: "Dashboard", href: "/officer" },
     { label: "Content Management", href: "/officer/content" },
+    { label: "Manage Funding", href: "/officer/funding" },
     { label: "User Management", href: "/officer/users" },
+    { label: "Staff & Leadership", href: "/officer/staff" },
+    { label: "Gallery Manager", href: "/officer/gallery" },
     { label: "Contact Inquiries", href: "/officer/inquiries" },
     { label: "Appeals", href: "/officer/appeals" },
     { label: "AI Reports", href: "/officer/reports" },
     { label: "Homepage Settings", href: "/officer/settings" },
     { label: "Profile", href: "/profile" },
-    { label: "Manage Funding", href: "/officer/funding" },
-    { label: "My Funded Projects", href: "/proposals/funded" },
-    { label: "Staff & Leadership", href: "/officer/staff" },
-    { label: "Gallery Manager", href: "/officer/gallery" },
   ],
 };
 
@@ -72,17 +71,20 @@ export default function Navbar() {
   }
 
   const roleMenu = user ? menuByRole[user.role] || [] : [];
+  const itemClass =
+    "block px-4 py-2.5 text-sm text-ink hover:bg-teal-tint transition-colors";
 
   return (
-    <div className="flex items-center justify-between px-7 py-4 border-b border-border bg-surface">
-      <Link href="/" className="flex items-center gap-2.5">
+    <div className="flex items-center justify-between gap-3 px-4 sm:px-7 py-4 border-b border-border bg-surface">
+      <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
         <div className="w-7 h-7 rounded-md bg-teal" />
         <span className="font-serif-brand font-bold text-base text-ink">
           KURIC
         </span>
       </Link>
 
-      <div className="hidden md:flex gap-6 text-sm text-body font-medium">
+      {/* Wide screens: inline links */}
+      <div className="hidden lg:flex gap-6 text-sm text-body font-medium">
         {navLinks.map((link) => (
           <Link
             key={link.href}
@@ -94,22 +96,34 @@ export default function Navbar() {
         ))}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <SearchBar />
         {user && <NotificationBell />}
+        {!user && (
+          <Link
+            href="/login"
+            className="bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg px-4 py-2 transition-colors whitespace-nowrap"
+          >
+            Log in
+          </Link>
+        )}
 
-        {user ? (
-          <div className="relative" ref={wrapperRef}>
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
-              className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-teal-tint transition-colors text-lg font-bold text-ink"
-              aria-label="Menu"
-            >
-              ⋯
-            </button>
+                <div
+          className={`relative ${user ? "" : "lg:hidden"}`}
+          ref={wrapperRef}
+        >
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-teal-tint transition-colors text-xl font-bold text-ink"
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+          >
+            &#8943;
+          </button>
 
-            {menuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-surface border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-60 max-h-[75vh] overflow-y-auto bg-surface border border-border rounded-xl shadow-lg z-50">
+              {user && (
                 <div className="px-4 py-3 border-b border-border">
                   <div className="text-sm font-semibold text-ink">
                     {user.name}
@@ -118,33 +132,54 @@ export default function Navbar() {
                     {user.role}
                   </div>
                 </div>
-                {roleMenu.map((item) => (
+              )}
+
+              {/* Site links: only inside the menu on small screens */}
+              <div className="lg:hidden border-b border-border">
+                <div className="px-4 pt-2.5 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted">
+                  Explore
+                </div>
+                {navLinks.map((link) => (
                   <Link
-                    key={item.href}
-                    href={item.href}
+                    key={link.href}
+                    href={link.href}
                     onClick={() => setMenuOpen(false)}
-                    className="block px-4 py-2.5 text-sm text-ink hover:bg-teal-tint transition-colors"
+                    className={itemClass}
                   >
-                    {item.label}
+                    {link.label}
                   </Link>
                 ))}
+              </div>
+
+              {user && roleMenu.length > 0 && (
+                <div>
+                  <div className="px-4 pt-2.5 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted">
+                    My workspace
+                  </div>
+                  {roleMenu.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className={itemClass}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+             {user && (
                 <button
                   onClick={handleLogout}
                   className="block w-full text-left px-4 py-2.5 text-sm text-danger hover:bg-danger-tint transition-colors border-t border-border"
                 >
                   Log out
                 </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <Link
-            href="/login"
-            className="bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg px-4 py-2.5 transition-colors"
-          >
-            Log in
-          </Link>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
