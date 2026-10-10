@@ -68,7 +68,6 @@ export default function HomePage() {
 
   const statCards = [
     { end: stats?.totalProposals ?? 0, prefix: "", label: "Total submissions", color: "text-teal-dark" },
-    { end: stats?.underReview ?? 0, prefix: "", label: "Under review", color: "text-gold-dark" },
     { end: stats?.activeProjects ?? 0, prefix: "", label: "Active funded projects", color: "text-teal-dark" },
     { end: stats?.publications ?? 0, prefix: "", label: "Publications", color: "text-teal-dark" },
     { end: stats?.fundedAmount ?? 0, prefix: "\u09F3", label: "Funded to date", color: "text-gold-dark" },
@@ -142,7 +141,7 @@ export default function HomePage() {
       </div>
 
       {/* Live stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-px bg-border">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border">
         {statCards.map((s) => (
           <div key={s.label} className="bg-surface text-center py-6 px-4">
             <div className={`font-serif-brand text-2xl md:text-3xl font-bold ${s.color}`}>

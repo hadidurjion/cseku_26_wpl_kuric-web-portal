@@ -914,3 +914,96 @@ export async function uploadAvatar(file: File, token: string) {
   if (!res.ok) throw new Error(data.message || "Failed to upload photo");
   return data.user as FullProfile;
 }
+export function fileUrl(filename?: string) {
+  return filename
+    ? "http://localhost:5000/uploads/" + encodeURIComponent(filename)
+    : "";
+}
+
+export interface StaffMember {
+  _id: string;
+  name: string;
+  designation: string;
+  email?: string;
+  phone?: string;
+  category: "director" | "staff";
+  startDate: string;
+  endDate?: string | null;
+}
+
+export async function getStaff() {
+  const res = await fetch(`${API_BASE}/staff`, { cache: "no-store" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch staff");
+  return data.staff as StaffMember[];
+}
+
+export async function createStaff(payload: Record<string, string>, token: string) {
+  const res = await fetch(`${API_BASE}/staff`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to add");
+  return data;
+}
+
+export async function endStaffTenure(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/staff/${id}/end`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({}),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed");
+  return data;
+}
+
+export async function deleteStaff(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/staff/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed");
+  return data;
+}
+
+export interface GalleryImage {
+  _id: string;
+  image: string;
+  caption?: string;
+  createdAt: string;
+}
+
+export async function getGallery() {
+  const res = await fetch(`${API_BASE}/gallery`, { cache: "no-store" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch gallery");
+  return data.images as GalleryImage[];
+}
+
+export async function uploadGalleryImages(files: File[], caption: string, token: string) {
+  const fd = new FormData();
+  files.forEach((f) => fd.append("images", f));
+  fd.append("caption", caption);
+  const res = await fetch(`${API_BASE}/gallery`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Upload failed");
+  return data;
+}
+
+export async function deleteGalleryImage(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/gallery/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed");
+  return data;
+}

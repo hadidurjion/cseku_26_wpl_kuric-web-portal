@@ -13,6 +13,7 @@ const navLinks = [
   { label: "Research", href: "/research" },
   { label: "Publications", href: "/publications" },
   { label: "Events", href: "/events" },
+  { label: "Gallery", href: "/gallery" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -38,6 +39,8 @@ const menuByRole: Record<string, { label: string; href: string }[]> = {
     { label: "Profile", href: "/profile" },
     { label: "Manage Funding", href: "/officer/funding" },
     { label: "My Funded Projects", href: "/proposals/funded" },
+    { label: "Staff & Leadership", href: "/officer/staff" },
+    { label: "Gallery Manager", href: "/officer/gallery" },
   ],
 };
 

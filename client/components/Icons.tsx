@@ -44,3 +44,6 @@ export const IconInbox = ({ className }: IconProps) => (
 export const IconSearch = ({ className }: IconProps) => (
   <svg {...base} className={className}><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
 );
+export const IconImage = ({ className }: IconProps) => (
+  <svg {...base} className={className}><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="m21 16-5-5-8 8" /></svg>
+);
