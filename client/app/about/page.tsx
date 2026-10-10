@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageHeader from "@/components/PageHeader";
+import { IconInfo } from "@/components/Icons";
 import { getHomepageSettings, HomepageSettings } from "@/lib/api";
 
 export default function AboutPage() {
@@ -16,13 +18,14 @@ export default function AboutPage() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
+      <PageHeader
+        eyebrow="About us"
+        title="Our mission at KURIC"
+        subtitle="Supporting research across Khulna University."
+        icon={<IconInfo />}
+      />
+
       <div className="px-10 py-9 flex-1 max-w-3xl">
-        <div className="text-[11px] tracking-widest uppercase text-muted font-bold mb-2">
-          About us
-        </div>
-        <h1 className="font-serif-brand text-3xl font-bold text-teal-dark mb-4">
-          Our mission at KURIC
-        </h1>
         <p className="text-sm text-body leading-relaxed mb-7 max-w-xl">
           {settings?.aboutMission ||
             "We advance research culture at Khulna University by supporting proposal development, funding pathways, and interdisciplinary collaboration across departments."}

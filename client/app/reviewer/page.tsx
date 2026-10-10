@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import EmptyState from "@/components/EmptyState";
 import { getToken, getStoredUser } from "@/lib/auth";
 import { getAssignedProposals, ProposalSummary } from "@/lib/api";
 
@@ -79,15 +80,17 @@ export default function ReviewerDashboard() {
         )}
 
         {!loading && !error && proposals.length === 0 && (
-          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-8 text-center">
-            No proposals assigned to you yet.
-          </div>
+          <EmptyState
+            message="No assigned proposals yet."
+            hint="Check back when new reviews are assigned to you."
+          />
         )}
 
         {!loading && !error && proposals.length > 0 && filteredProposals.length === 0 && (
-          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-6 text-center">
-            No proposals found matching &quot;{searchTerm}&quot;.
-          </div>
+          <EmptyState
+            message={`No proposals found matching "${searchTerm}".`}
+            hint="Try searching with another term."
+          />
         )}
 
         <div className="space-y-3">

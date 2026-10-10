@@ -227,6 +227,7 @@ export interface ContentItem {
   location?: string;
   authors?: string;
   year?: string;
+  image?: string;
 }
 
 export async function getContent(type: string) {
@@ -245,26 +246,29 @@ export async function getContent(type: string) {
 }
 
 export async function createContent(
-  item: Partial<ContentItem>,
-  token: string
+  item: Record<string, string>,
+  token: string,
+  imageFile?: File | null
 ) {
-  try {
-    const res = await fetch(`${API_BASE}/content`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(item),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to create content");
-    return data.item as ContentItem;
-  } catch (error: any) {
-    throw new Error(error.message === "Failed to fetch" ? "Unable to connect to server" : error.message);
-  }
+  const fd = new FormData();
+  Object.entries(item).forEach(([k, v]) => fd.append(k, v));
+  if (imageFile) fd.append("image", imageFile);
+
+  const res = await fetch(`${API_BASE}/content`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to create content");
+  return data.item as ContentItem;
 }
 
+export function imageUrl(filename?: string) {
+  return filename
+    ? "http://localhost:5000/uploads/" + encodeURIComponent(filename)
+    : "";
+}
 export async function deleteContent(id: string, token: string) {
   try {
     const res = await fetch(`${API_BASE}/content/${id}`, {

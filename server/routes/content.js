@@ -2,6 +2,14 @@ const express = require('express');
 const router = express.Router();
 const Content = require('../models/Content');
 const authMiddleware = require('../middleware/authMiddleware');
+const multer = require('multer');
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) =>
+      cb(null, `${Date.now()}-thumb-${file.originalname.replace(/\s+/g, '_')}`),
+  }),
+});
 
 function requireOfficer(req, res, next) {
   if (req.user.role !== 'officer') {
@@ -23,9 +31,11 @@ router.get('/', async (req, res) => {
 });
 
 // POST create content (officer only)
-router.post('/', authMiddleware, requireOfficer, async (req, res) => {
+router.post('/', authMiddleware, requireOfficer, upload.single('image'), async (req, res) => {
   try {
-    const item = await Content.create({ ...req.body, createdBy: req.user.id });
+    const data = { ...req.body, createdBy: req.user.id };
+    if (req.file) data.image = req.file.filename;
+    const item = await Content.create(data);
     res.status(201).json({ message: 'Content created', item });
   } catch (err) {
     console.error(err);
@@ -33,12 +43,11 @@ router.post('/', authMiddleware, requireOfficer, async (req, res) => {
   }
 });
 
-// PUT update content (officer only)
-router.put('/:id', authMiddleware, requireOfficer, async (req, res) => {
+router.put('/:id', authMiddleware, requireOfficer, upload.single('image'), async (req, res) => {
   try {
-    const item = await Content.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const data = { ...req.body };
+    if (req.file) data.image = req.file.filename;
+    const item = await Content.findByIdAndUpdate(req.params.id, data, { new: true });
     if (!item) return res.status(404).json({ message: 'Content not found' });
     res.json({ message: 'Content updated', item });
   } catch (err) {
@@ -46,7 +55,6 @@ router.put('/:id', authMiddleware, requireOfficer, async (req, res) => {
     res.status(500).json({ message: 'Server error updating content' });
   }
 });
-
 // DELETE content (officer only)
 router.delete('/:id', authMiddleware, requireOfficer, async (req, res) => {
   try {

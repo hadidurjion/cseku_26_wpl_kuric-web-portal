@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import EmptyState from "@/components/EmptyState";
 import { getToken, getStoredUser } from "@/lib/auth";
 import { getFundingByProposal } from "@/lib/api";
 
@@ -36,7 +37,7 @@ export default function ProposalsListPage() {
   const [error, setError] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("All");
-  const [searchTerm, setSearchTerm] = useState(""); 
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const user = getStoredUser();
@@ -60,6 +61,12 @@ export default function ProposalsListPage() {
       .catch(() => setError("Failed to connect to server"))
       .finally(() => setLoading(false));
   }, [router]);
+
+  const filteredProposals = proposals.filter(
+    (p) =>
+      (statusFilter === "All" || p.status === statusFilter) &&
+      p.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -89,23 +96,31 @@ export default function ProposalsListPage() {
         )}
 
         {!loading && !error && proposals.length === 0 && (
-          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-8 text-center">
-            You haven&apos;t submitted any proposals yet.
-          </div>
+          <EmptyState
+            message="You haven't submitted any proposals yet."
+            hint="Click '+ New proposal' to get started."
+          />
         )}
 
-        <div className="space-y-3">
-          {/* Search Input */}
-          <input 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)} 
-            placeholder="Search your proposals..." 
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal mb-3" 
-          />
+        {proposals.length > 0 && (
+          <div className="stagger space-y-3">
+            {/* Search Input */}
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search your proposals..."
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal mb-3"
+            />
 
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-            {["All", "Pending", "Under Review", "Accepted", "Revision Needed", "Rejected"].map(
-              (s) => (
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+              {[
+                "All",
+                "Pending",
+                "Under Review",
+                "Accepted",
+                "Revision Needed",
+                "Rejected",
+              ].map((s) => (
                 <button
                   key={s}
                   onClick={() => setStatusFilter(s)}
@@ -117,17 +132,17 @@ export default function ProposalsListPage() {
                 >
                   {s}
                 </button>
-              )
-            )}
-          </div>
+              ))}
+            </div>
 
-          {proposals
-            .filter(
-              (p) =>
-                (statusFilter === "All" || p.status === statusFilter) &&
-                p.title.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-            .map((p) => (
+            {!loading && filteredProposals.length === 0 && (
+              <EmptyState
+                message="No proposals match your search or filter."
+                hint="Try searching with another keyword or changing the filter."
+              />
+            )}
+
+            {filteredProposals.map((p) => (
               <div
                 key={p._id}
                 className="bg-surface border border-border rounded-xl px-5 py-4"
@@ -189,7 +204,7 @@ export default function ProposalsListPage() {
                       )}
                     </div>
                   </div>
-                )} 
+                )}
 
                 {expandedId === p._id && p.reviewComment && (
                   <div className="mt-4 pt-4 border-t border-border">
@@ -243,7 +258,8 @@ export default function ProposalsListPage() {
                 )}
               </div>
             ))}
-        </div>
+          </div>
+        )}
       </div>
 
       <Footer />

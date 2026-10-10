@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageHeader from "@/components/PageHeader";
+import { IconMail } from "@/components/Icons";
 import { getHomepageSettings, submitInquiry, HomepageSettings } from "@/lib/api";
 
 export default function ContactPage() {
@@ -40,12 +42,15 @@ export default function ContactPage() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
+      <PageHeader
+        eyebrow="Reach us"
+        title="Get in touch"
+        subtitle="Questions, partnerships or feedback, we would love to hear from you."
+        icon={<IconMail />}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 flex-1">
         <div className="px-10 py-9">
-          <h1 className="font-serif-brand text-xl font-bold text-ink mb-5">
-            Get in touch
-          </h1>
-
           {submitted ? (
             <div className="rounded-lg border border-teal bg-teal-tint text-teal-dark px-4 py-3 text-sm max-w-sm">
               Thanks for reaching out! We&apos;ll get back to you soon.

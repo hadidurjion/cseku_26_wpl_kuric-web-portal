@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageHeader from "@/components/PageHeader";
+import { IconUser } from "@/components/Icons";
 import { getToken, getStoredUser } from "@/lib/auth";
 import { getMyProfile, updateMyProfile, uploadAvatar, FullProfile } from "@/lib/api";
 
@@ -125,6 +127,12 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+
+      <PageHeader
+        eyebrow="Account"
+        title="My profile"
+        icon={<IconUser />}
+      />
 
       <div className="px-10 py-9 flex-1 max-w-2xl mx-auto w-full">
         {error && (

@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageHeader from "@/components/PageHeader";
+import EmptyState from "@/components/EmptyState";
+import { IconSearch } from "@/components/Icons";
 import { getContent, ContentItem } from "@/lib/api";
 
 const categories = ["All", "ICT", "Environment", "Health"];
@@ -37,11 +40,14 @@ export default function ResearchPage() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <div className="px-10 py-9 flex-1">
-        <h1 className="font-serif-brand text-xl font-bold text-ink mb-4">
-          Research areas
-        </h1>
+      <PageHeader
+        eyebrow="Explore"
+        title="Research areas"
+        subtitle="Discover research projects and multidisciplinary initiatives at Khulna University."
+        icon={<IconSearch />}
+      />
 
+      <div className="px-10 py-9 flex-1">
         <div className="flex gap-2 mb-5">
           {categories.map((cat) => (
             <button
@@ -61,12 +67,13 @@ export default function ResearchPage() {
         {loading && <p className="text-sm text-muted">Loading...</p>}
 
         {!loading && filtered.length === 0 && (
-          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-8 text-center">
-            No research projects to show yet.
-          </div>
+          <EmptyState
+            message="No research projects to show yet."
+            hint="Check back soon."
+          />
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <div className="stagger grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {filtered.map((p) => (
             <div
               key={p._id}

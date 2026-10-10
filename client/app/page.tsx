@@ -7,6 +7,8 @@ import Footer from "@/components/Footer";
 import NewsTicker from "@/components/NewsTicker";
 import Reveal from "@/components/Reveal";
 import CountUp from "@/components/CountUp";
+import { IconChip, IconLeaf, IconHeart } from "@/components/Icons";
+import Thumb from "@/components/Thumb";
 import {
   getHomepageSettings,
   getContent,
@@ -19,9 +21,9 @@ type Item = ContentItem & { createdAt?: string; category?: string };
 type Tagged = Item & { tagLabel: string; tagColor: string; border: string };
 
 const disciplines = [
-  { name: "ICT", span: "md:col-span-2", style: "bg-teal text-white", sub: "text-teal-tint" },
-  { name: "Environment", span: "", style: "bg-gold-tint text-gold-dark", sub: "text-gold-dark" },
-  { name: "Health", span: "", style: "bg-teal-tint text-teal-dark", sub: "text-teal-dark" },
+  { name: "ICT", span: "md:col-span-2", style: "bg-teal text-white", sub: "text-teal-tint", icon: <IconChip /> },
+  { name: "Environment", span: "", style: "bg-gold-tint text-gold-dark", sub: "text-gold-dark", icon: <IconLeaf /> },
+  { name: "Health", span: "", style: "bg-teal-tint text-teal-dark", sub: "text-teal-dark", icon: <IconHeart /> },
 ];
 
 export default function HomePage() {
@@ -167,6 +169,7 @@ export default function HomePage() {
                 href="/research"
                 className={`block h-full min-h-[120px] rounded-2xl p-6 ${d.style} hover:shadow-lg transition-shadow`}
               >
+                <div className="mb-3 opacity-90">{d.icon}</div>
                 <div className="font-serif-brand text-xl font-bold">
                   {d.name}
                 </div>
@@ -201,18 +204,26 @@ export default function HomePage() {
               <Reveal key={item._id} delay={i * 100}>
                 <Link
                   href={`/events/${item._id}`}
-                  className={`block h-full bg-surface border border-border ${item.border} border-l-4 rounded-lg p-4 hover:shadow-md transition-shadow`}
+                  className={`block h-full bg-surface border border-border ${item.border} border-l-4 rounded-lg overflow-hidden hover:shadow-md transition-shadow`}
                 >
-                  <div className={`text-[11px] tracking-wide uppercase font-bold mb-2 ${item.tagColor}`}>
-                    {item.tagLabel}
-                  </div>
-                  <div className="text-sm font-semibold text-ink leading-snug mb-1.5">
-                    {item.title}
-                  </div>
-                  <div className="text-xs text-muted font-medium">
-                    {item.createdAt
-                      ? new Date(item.createdAt).toLocaleDateString()
-                      : ""}
+                  <Thumb
+                    image={item.image}
+                    title={item.title}
+                    type={item.tagLabel}
+                    className="h-32"
+                  />
+                  <div className="p-4">
+                    <div className={`text-[11px] tracking-wide uppercase font-bold mb-2 ${item.tagColor}`}>
+                      {item.tagLabel}
+                    </div>
+                    <div className="text-sm font-semibold text-ink leading-snug mb-1.5">
+                      {item.title}
+                    </div>
+                    <div className="text-xs text-muted font-medium">
+                      {item.createdAt
+                        ? new Date(item.createdAt).toLocaleDateString()
+                        : ""}
+                    </div>
                   </div>
                 </Link>
               </Reveal>
