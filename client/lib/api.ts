@@ -103,8 +103,11 @@ export async function getAssignedProposals(token: string) {
     const res = await fetch(`${API_BASE}/reviews/assigned`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch assigned proposals");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch assigned proposals");
     return data.proposals as ProposalSummary[];
   } catch (error) {
     console.error("getAssignedProposals error:", error);
@@ -164,8 +167,11 @@ export async function getAllProposals(token: string) {
     const res = await fetch(`${API_BASE}/reviews/all-proposals`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch proposals");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch proposals");
     return data.proposals as OfficerProposal[];
   } catch (error) {
     console.error("getAllProposals error:", error);
@@ -178,8 +184,11 @@ export async function getReviewers(token: string) {
     const res = await fetch(`${API_BASE}/reviews/reviewers`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch reviewers");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch reviewers");
     return data.reviewers as Reviewer[];
   } catch (error) {
     console.error("getReviewers error:", error);
@@ -218,13 +227,17 @@ export interface ContentItem {
   location?: string;
   authors?: string;
   year?: string;
+  image?: string;
 }
 
 export async function getContent(type: string) {
   try {
     const res = await fetch(`${API_BASE}/content?type=${type}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch content");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch content");
     return (data.items || []) as ContentItem[];
   } catch (error) {
     console.error(`getContent error for type ${type}:`, error);
@@ -233,24 +246,28 @@ export async function getContent(type: string) {
 }
 
 export async function createContent(
-  item: Partial<ContentItem>,
-  token: string
+  item: Record<string, string>,
+  token: string,
+  imageFile?: File | null
 ) {
-  try {
-    const res = await fetch(`${API_BASE}/content`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(item),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to create content");
-    return data.item as ContentItem;
-  } catch (error: any) {
-    throw new Error(error.message === "Failed to fetch" ? "Unable to connect to server" : error.message);
-  }
+  const fd = new FormData();
+  Object.entries(item).forEach(([k, v]) => fd.append(k, v));
+  if (imageFile) fd.append("image", imageFile);
+
+  const res = await fetch(`${API_BASE}/content`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to create content");
+  return data.item as ContentItem;
+}
+
+export function imageUrl(filename?: string) {
+  return filename
+    ? "http://localhost:5000/uploads/" + encodeURIComponent(filename)
+    : "";
 }
 
 export async function deleteContent(id: string, token: string) {
@@ -280,8 +297,12 @@ export async function getNotifications(token: string) {
     const res = await fetch(`${API_BASE}/notifications`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      console.error("Failed to fetch notifications:", data.message || res.statusText);
+      return { notifications: [], unreadCount: 0 };
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch notifications");
     return data as { notifications: NotificationItem[]; unreadCount: number };
   } catch (error) {
     console.error("getNotifications error:", error);
@@ -330,8 +351,11 @@ export async function getMyProposalDetail(id: string, token: string) {
     const res = await fetch(`${API_BASE}/proposals/mine`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch");
     return (data.proposals as ProposalDetail[]).find((p) => p._id === id);
   } catch (error) {
     console.error("getMyProposalDetail error:", error);
@@ -353,8 +377,11 @@ export async function getAllUsers(token: string) {
     const res = await fetch(`${API_BASE}/reviews/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch users");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch users");
     return data.users as ManagedUser[];
   } catch (error) {
     console.error("getAllUsers error:", error);
@@ -438,8 +465,11 @@ export async function getPendingAppeals(token: string) {
     const res = await fetch(`${API_BASE}/reviews/appeals`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch appeals");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch appeals");
     return data.proposals as AppealProposal[];
   } catch (error) {
     console.error("getPendingAppeals error:", error);
@@ -508,6 +538,11 @@ export interface FullProfile {
   department?: string;
   designation?: string;
   bio?: string;
+  avatar?: string;
+  phone?: string;
+  researchInterests?: string;
+  expertise?: string;
+  profileLink?: string;
 }
 
 export async function getMyProfile(token: string) {
@@ -524,7 +559,7 @@ export async function getMyProfile(token: string) {
 }
 
 export async function updateMyProfile(
-  payload: { name?: string; department?: string; bio?: string },
+  payload: Partial<FullProfile>,
   token: string
 ) {
   try {
@@ -618,8 +653,11 @@ export async function adminResetPassword(
 export async function searchContent(query: string) {
   try {
     const res = await fetch(`${API_BASE}/content/search/${encodeURIComponent(query)}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Search failed");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Search failed");
     return (data.items || []) as ContentItem[];
   } catch (error) {
     console.error("searchContent error:", error);
@@ -652,8 +690,11 @@ export async function getInquiries(token: string) {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to fetch inquiries");
+    }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch inquiries");
     return (data.inquiries || []) as Inquiry[];
   } catch (error) {
     console.error("getInquiries error:", error);
@@ -680,22 +721,25 @@ export async function submitInquiry(payload: {
   }
 }
 
+export interface Installment {
+  _id: string;
+  label: string;
+  percent: number;
+  amount: number;
+  dueMonths: number;
+  reportRequired: boolean;
+  status: string;
+  reportText?: string;
+  reportFile?: string;
+  submittedAt?: string | null;
+  releasedAt?: string | null;
+}
+
 export interface FundedProject {
   _id: string;
   fundingNumber: string;
   totalAmount: number;
-  initialPercent: number;
-  initialDisbursed: number;
-  sixMonthDisbursed: number;
-  disbursementStatus: string;
-  sixMonthReportText?: string;
-  sixMonthReportFile?: string;
-  sixMonthReportStatus: string;
-  sixMonthSubmittedAt?: string | null;
-  oneYearReportText?: string;
-  oneYearReportFile?: string;
-  oneYearReportStatus: string;
-  oneYearSubmittedAt?: string | null;
+  installments: Installment[];
   publicationStatus: string;
   journalName?: string;
   publicationLink?: string;
@@ -706,113 +750,94 @@ export interface FundedProject {
 }
 
 export async function getEligibleProposals(token: string) {
-  try {
-    const res = await fetch(`${API_BASE}/funding/eligible-proposals`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch");
-    return data.proposals || [];
-  } catch (error) {
-    console.error("getEligibleProposals error:", error);
-    return [];
-  }
+  const res = await fetch(`${API_BASE}/funding/eligible-proposals`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch");
+  return data.proposals;
 }
 
 export async function createFunding(
   proposalId: string,
   totalAmount: number,
-  initialPercent: number,
+  installments: { label: string; percent: number; dueMonths: number; reportRequired: boolean }[],
   token: string
 ) {
-  try {
-    const res = await fetch(`${API_BASE}/funding`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ proposalId, totalAmount, initialPercent }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to create funding");
-    return data;
-  } catch (error: any) {
-    throw new Error(error.message === "Failed to fetch" ? "Unable to connect to server" : error.message);
-  }
+  const res = await fetch(`${API_BASE}/funding`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ proposalId, totalAmount, installments }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to create funding");
+  return data;
 }
 
 export async function getAllFundedProjects(token: string) {
-  try {
-    const res = await fetch(`${API_BASE}/funding`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch");
-    return (data.projects || []) as FundedProject[];
-  } catch (error) {
-    console.error("getAllFundedProjects error:", error);
-    return [];
-  }
+  const res = await fetch(`${API_BASE}/funding`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch");
+  return data.projects as FundedProject[];
 }
 
 export async function getFundedProject(id: string, token: string) {
-  try {
-    const res = await fetch(`${API_BASE}/funding/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch");
-    return data.project as FundedProject;
-  } catch (error: any) {
-    throw new Error(error.message === "Failed to fetch" ? "Unable to connect to server" : error.message);
-  }
+  const res = await fetch(`${API_BASE}/funding/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch");
+  return data.project as FundedProject;
 }
 
 export async function getMyFundedProjects(token: string) {
-  try {
-    const res = await fetch(`${API_BASE}/funding/mine/list`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch");
-    return (data.projects || []) as FundedProject[];
-  } catch (error) {
-    console.error("getMyFundedProjects error:", error);
-    return [];
-  }
+  const res = await fetch(`${API_BASE}/funding/mine/list`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch");
+  return data.projects as FundedProject[];
 }
 
-export async function approveSixMonth(id: string, token: string) {
-  try {
-    const res = await fetch(`${API_BASE}/funding/${id}/approve-six-month`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to approve");
-    return data;
-  } catch (error: any) {
-    throw new Error(error.message === "Failed to fetch" ? "Unable to connect to server" : error.message);
-  }
+export async function releaseInstallment(
+  projectId: string,
+  installmentId: string,
+  token: string
+) {
+  const res = await fetch(
+    `${API_BASE}/funding/${projectId}/installments/${installmentId}/release`,
+    { method: "PATCH", headers: { Authorization: `Bearer ${token}` } }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to release");
+  return data;
 }
 
-export async function approveOneYear(id: string, token: string) {
-  try {
-    const res = await fetch(`${API_BASE}/funding/${id}/approve-one-year`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to approve");
-    return data;
-  } catch (error: any) {
-    throw new Error(error.message === "Failed to fetch" ? "Unable to connect to server" : error.message);
-  }
+export async function addInstallment(
+  projectId: string,
+  payload: { label: string; percent: number; dueMonths: number; reportRequired: boolean },
+  token: string
+) {
+  const res = await fetch(`${API_BASE}/funding/${projectId}/installments`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to add installment");
+  return data;
 }
 
 export async function updatePublication(
@@ -820,37 +845,172 @@ export async function updatePublication(
   payload: { publicationStatus: string; journalName: string; publicationLink: string },
   token: string
 ) {
-  try {
-    const res = await fetch(`${API_BASE}/funding/${id}/publication`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to update");
-    return data;
-  } catch (error: any) {
-    throw new Error(error.message === "Failed to fetch" ? "Unable to connect to server" : error.message);
-  }
+  const res = await fetch(`${API_BASE}/funding/${id}/publication`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update");
+  return data;
 }
 
 export async function updateFundingAmount(id: string, totalAmount: number, token: string) {
-  try {
-    const res = await fetch(`${API_BASE}/funding/${id}/amount`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ totalAmount }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to update");
-    return data;
-  } catch (error: any) {
-    throw new Error(error.message === "Failed to fetch" ? "Unable to connect to server" : error.message);
-  }
+  const res = await fetch(`${API_BASE}/funding/${id}/amount`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ totalAmount }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update");
+  return data;
+}
+
+export async function markInquiryRead(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/inquiries/${id}/read`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed");
+  return data;
+}
+
+export async function getFundingByProposal(proposalId: string, token: string) {
+  const res = await fetch(`${API_BASE}/funding/by-proposal/${proposalId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Not found");
+  return data.project as FundedProject;
+}
+
+export interface PublicStats {
+  totalProposals: number;
+  underReview: number;
+  accepted: number;
+  activeProjects: number;
+  publications: number;
+  fundedAmount: number;
+}
+
+export async function getPublicStats() {
+  const res = await fetch(`${API_BASE}/settings/stats`, { cache: "no-store" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch stats");
+  return data as PublicStats;
+}
+
+export async function uploadAvatar(file: File, token: string) {
+  const fd = new FormData();
+  fd.append("avatar", file);
+  const res = await fetch(`${API_BASE}/auth/me/avatar`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to upload photo");
+  return data.user as FullProfile;
+}
+
+export function fileUrl(filename?: string) {
+  return filename
+    ? "http://localhost:5000/uploads/" + encodeURIComponent(filename)
+    : "";
+}
+
+export interface StaffMember {
+  _id: string;
+  name: string;
+  designation: string;
+  email?: string;
+  phone?: string;
+  category: "director" | "staff";
+  startDate: string;
+  endDate?: string | null;
+}
+
+export async function getStaff() {
+  const res = await fetch(`${API_BASE}/staff`, { cache: "no-store" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch staff");
+  return data.staff as StaffMember[];
+}
+
+export async function createStaff(payload: Record<string, string>, token: string) {
+  const res = await fetch(`${API_BASE}/staff`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to add");
+  return data;
+}
+
+export async function endStaffTenure(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/staff/${id}/end`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({}),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed");
+  return data;
+}
+
+export async function deleteStaff(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/staff/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed");
+  return data;
+}
+
+export interface GalleryImage {
+  _id: string;
+  image: string;
+  caption?: string;
+  createdAt: string;
+}
+
+export async function getGallery() {
+  const res = await fetch(`${API_BASE}/gallery`, { cache: "no-store" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch gallery");
+  return data.images as GalleryImage[];
+}
+
+export async function uploadGalleryImages(files: File[], caption: string, token: string) {
+  const fd = new FormData();
+  files.forEach((f) => fd.append("images", f));
+  fd.append("caption", caption);
+  const res = await fetch(`${API_BASE}/gallery`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Upload failed");
+  return data;
+}
+
+export async function deleteGalleryImage(id: string, token: string) {
+  const res = await fetch(`${API_BASE}/gallery/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed");
+  return data;
 }

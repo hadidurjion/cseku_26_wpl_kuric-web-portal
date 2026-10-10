@@ -190,7 +190,7 @@ export default function OfficerDashboard() {
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="stagger space-y-3">
         {proposals
           .filter(
             (p) =>

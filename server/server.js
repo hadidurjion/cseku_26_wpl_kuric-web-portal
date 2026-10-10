@@ -13,6 +13,9 @@ const aiRoutes = require('./routes/ai');
 const officerRoutes = require('./routes/officer');
 const inquiryRoutes = require('./routes/inquiries');
 const fundingRoutes = require('./routes/funding');
+const staffRoutes = require('./routes/staff');
+const galleryRoutes = require('./routes/gallery');
+
 
 const app = express();
 
@@ -44,6 +47,8 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/officer', officerRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/funding', fundingRoutes);
+app.use('/api/staff', staffRoutes);
+app.use('/api/gallery', galleryRoutes);
 
 app.get('/', (req, res) => {
   res.send('KURIC API is running');

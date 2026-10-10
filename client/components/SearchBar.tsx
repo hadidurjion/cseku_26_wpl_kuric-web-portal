@@ -40,6 +40,7 @@ export default function SearchBar() {
     event: "Event",
     news: "News",
     publication: "Publication",
+    research: "Research",
   };
 
   return (
@@ -72,15 +73,10 @@ export default function SearchBar() {
               <p className="px-4 py-3 text-xs text-muted">No results found.</p>
             )}
             {results.map((item) => {
-              const typeToPage: Record<string, string> = {
-                event: "/events",
-                news: "/events",
-                publication: "/publications",
-              };
               return (
                 <Link
                   key={item._id}
-                  href={typeToPage[item.type] || "/"}
+                  href={`/events/${item._id}`}
                   onClick={() => setOpen(false)}
                   className="block px-4 py-3 border-b border-border last:border-b-0 hover:bg-teal-tint transition-colors"
                 >

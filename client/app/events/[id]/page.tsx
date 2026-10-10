@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Thumb from "@/components/Thumb";
 import { getContentItem, ContentItem } from "@/lib/api";
 
 const typeLabels: Record<string, string> = {
@@ -43,13 +44,24 @@ export default function ContentDetailPage() {
     );
   }
 
+  const tagLabel = typeLabels[item.type] || item.type;
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
       <div className="px-10 py-9 flex-1 max-w-2xl mx-auto w-full">
+        <div className="mb-4 rounded-xl overflow-hidden border border-border">
+          <Thumb
+            image={item.image}
+            title={item.title}
+            type={tagLabel}
+            className="h-56 md:h-64"
+          />
+        </div>
+
         <div className="text-[11px] tracking-widest uppercase text-teal-dark font-bold mb-2">
-          {typeLabels[item.type] || item.type}
+          {tagLabel}
         </div>
         <h1 className="font-serif-brand text-2xl font-bold text-ink mb-3">
           {item.title}
