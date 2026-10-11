@@ -232,27 +232,27 @@ export default function FundingDetailPage() {
           {showAddForm && (
             <form
               onSubmit={handleAddInstallment}
-              className="grid grid-cols-[2fr_1fr_1fr_auto] gap-2 items-center mb-4 pb-4 border-b border-border"
+              className="grid grid-cols-2 sm:grid-cols-[2fr_1fr_1fr_auto] gap-2 items-center mb-4 pb-4 border-b border-border"
             >
               <input
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 placeholder="Label"
-                className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal"
+                className="col-span-2 sm:col-span-1 rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal min-w-0"
               />
               <input
                 type="number"
                 value={newPercent}
                 onChange={(e) => setNewPercent(e.target.value)}
                 placeholder="%"
-                className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal"
+                className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal min-w-0"
               />
               <input
                 type="number"
                 value={newDueMonths}
                 onChange={(e) => setNewDueMonths(e.target.value)}
                 placeholder="Due (mo)"
-                className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal"
+                className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal min-w-0"
               />
               <button
                 type="submit"
@@ -270,7 +270,7 @@ export default function FundingDetailPage() {
                 key={inst._id}
                 className="border border-border rounded-lg p-3"
               >
-                <div className="flex justify-between items-center mb-1">
+                <div className="flex flex-wrap justify-between items-center gap-2 mb-1">
                   <div className="text-sm font-semibold text-ink">
                     {inst.label}{" "}
                     <span className="text-muted font-normal">

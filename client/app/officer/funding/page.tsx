@@ -208,26 +208,29 @@ export default function FundingListPage() {
               </div>
               <div className="space-y-2">
                 {installments.map((inst, idx) => (
-                  <div key={idx} className="grid grid-cols-[2fr_1fr_1fr_auto_auto] gap-2 items-center">
+                  <div
+                    key={idx}
+                    className="grid grid-cols-2 sm:grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_auto_auto] gap-2 items-center p-3 sm:p-0 border border-border sm:border-0 rounded-lg"
+                  >
                     <input
                       value={inst.label}
                       onChange={(e) => updateInstallment(idx, "label", e.target.value)}
                       placeholder="Label (e.g. Milestone 1)"
-                      className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal"
+                      className="col-span-2 sm:col-span-1 rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal min-w-0"
                     />
                     <input
                       type="number"
                       value={inst.percent}
                       onChange={(e) => updateInstallment(idx, "percent", e.target.value)}
                       placeholder="%"
-                      className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal"
+                      className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal min-w-0"
                     />
                     <input
                       type="number"
                       value={inst.dueMonths}
                       onChange={(e) => updateInstallment(idx, "dueMonths", e.target.value)}
                       placeholder="Due (months)"
-                      className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal"
+                      className="rounded-lg border border-border px-2.5 py-2 text-sm outline-none focus:border-teal min-w-0"
                     />
                     <label className="flex items-center gap-1 text-xs text-muted whitespace-nowrap">
                       <input
