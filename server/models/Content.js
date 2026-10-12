@@ -31,6 +31,10 @@ const contentSchema = new mongoose.Schema({
   status: {
     type: String,
   },
+  image: {
+    type: String,
+    default: '',
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

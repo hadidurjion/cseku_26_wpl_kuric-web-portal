@@ -4,6 +4,7 @@ const router = express.Router();
 const FundedProject = require('../models/FundedProject');
 const Proposal = require('../models/Proposal');
 const Notification = require('../models/Notification');
+const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware');
 
 const storage = multer.diskStorage({
@@ -19,10 +20,18 @@ function requireOfficer(req, res, next) {
   next();
 }
 
-// POST create a funded project from an accepted proposal (officer only)
+// POST create a funded project with custom installments (officer only)
 router.post('/', authMiddleware, requireOfficer, async (req, res) => {
   try {
-    const { proposalId, totalAmount, initialPercent } = req.body;
+    const { proposalId, totalAmount, installments } = req.body;
+
+    if (!installments || !Array.isArray(installments) || installments.length === 0) {
+      return res.status(400).json({ message: 'At least one installment is required' });
+    }
+    const percentSum = installments.reduce((sum, i) => sum + Number(i.percent), 0);
+    if (percentSum !== 100) {
+      return res.status(400).json({ message: 'Installment percentages must add up to 100' });
+    }
 
     const proposal = await Proposal.findById(proposalId);
     if (!proposal) {
@@ -41,17 +50,22 @@ router.post('/', authMiddleware, requireOfficer, async (req, res) => {
     const count = await FundedProject.countDocuments();
     const fundingNumber = `KURIC-FUND-${year}-${String(count + 1).padStart(3, '0')}`;
 
-    const percent = initialPercent || 50;
-    const initialDisbursed = Math.round((totalAmount * percent) / 100);
+    const preparedInstallments = installments.map((i, idx) => ({
+      label: i.label,
+      percent: Number(i.percent),
+      amount: Math.round((totalAmount * Number(i.percent)) / 100),
+      dueMonths: Number(i.dueMonths) || 0,
+      reportRequired: idx === 0 ? false : i.reportRequired !== false,
+      status: idx === 0 ? 'Released' : 'Pending',
+      releasedAt: idx === 0 ? new Date() : null,
+    }));
 
     const project = await FundedProject.create({
       proposal: proposalId,
       researcher: proposal.researcher,
       fundingNumber,
       totalAmount,
-      initialPercent: percent,
-      initialDisbursed,
-      disbursementStatus: 'Initial Released',
+      installments: preparedInstallments,
     });
 
     await Notification.create({
@@ -67,7 +81,6 @@ router.post('/', authMiddleware, requireOfficer, async (req, res) => {
   }
 });
 
-// GET all funded projects (officer only)
 router.get('/', authMiddleware, requireOfficer, async (req, res) => {
   try {
     const projects = await FundedProject.find()
@@ -81,7 +94,6 @@ router.get('/', authMiddleware, requireOfficer, async (req, res) => {
   }
 });
 
-// GET accepted proposals that don't have funding yet (officer only)
 router.get('/eligible-proposals', authMiddleware, requireOfficer, async (req, res) => {
   try {
     const funded = await FundedProject.find().select('proposal');
@@ -98,7 +110,6 @@ router.get('/eligible-proposals', authMiddleware, requireOfficer, async (req, re
   }
 });
 
-// GET a single funded project (officer or the owning researcher)
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const project = await FundedProject.findById(req.params.id)
@@ -122,7 +133,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// GET funded projects belonging to the logged-in researcher
 router.get('/mine/list', authMiddleware, async (req, res) => {
   try {
     const projects = await FundedProject.find({ researcher: req.user.id })
@@ -135,9 +145,9 @@ router.get('/mine/list', authMiddleware, async (req, res) => {
   }
 });
 
-// POST researcher submits 6-month report
+// POST researcher submits a report for a specific installment
 router.post(
-  '/:id/six-month-report',
+  '/:id/installments/:installmentId/report',
   authMiddleware,
   upload.single('reportFile'),
   async (req, res) => {
@@ -150,23 +160,27 @@ router.post(
         return res.status(403).json({ message: 'Not authorized' });
       }
 
-      project.sixMonthReportText = req.body.reportText || '';
-      if (req.file) project.sixMonthReportFile = req.file.filename;
-      project.sixMonthReportStatus = 'Submitted';
-      project.sixMonthSubmittedAt = new Date();
-      project.disbursementStatus = 'Awaiting 6-month Report';
+      const installment = project.installments.id(req.params.installmentId);
+      if (!installment) {
+        return res.status(404).json({ message: 'Installment not found' });
+      }
+
+      installment.reportText = req.body.reportText || '';
+      if (req.file) installment.reportFile = req.file.filename;
+      installment.status = 'Report Submitted';
+      installment.submittedAt = new Date();
       await project.save();
 
-      const officers = await require('../models/User').find({ role: 'officer' });
+      const officers = await User.find({ role: 'officer' });
       await Notification.insertMany(
         officers.map((o) => ({
           user: o._id,
-          message: `6-month report submitted for ${project.fundingNumber}`,
+          message: `Report submitted for "${installment.label}" — ${project.fundingNumber}`,
           link: `/officer/funding/${project._id}`,
         }))
       );
 
-      res.json({ message: '6-month report submitted', project });
+      res.json({ message: 'Report submitted', project });
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: 'Server error submitting report' });
@@ -174,98 +188,73 @@ router.post(
   }
 );
 
-// POST researcher submits 1-year report
-router.post(
-  '/:id/one-year-report',
+// PATCH officer releases an installment (after reviewing report, or directly for ones with no report required)
+router.patch(
+  '/:id/installments/:installmentId/release',
   authMiddleware,
-  upload.single('reportFile'),
+  requireOfficer,
   async (req, res) => {
     try {
       const project = await FundedProject.findById(req.params.id);
       if (!project) {
         return res.status(404).json({ message: 'Funded project not found' });
       }
-      if (project.researcher.toString() !== req.user.id) {
-        return res.status(403).json({ message: 'Not authorized' });
+
+      const installment = project.installments.id(req.params.installmentId);
+      if (!installment) {
+        return res.status(404).json({ message: 'Installment not found' });
       }
 
-      project.oneYearReportText = req.body.reportText || '';
-      if (req.file) project.oneYearReportFile = req.file.filename;
-      project.oneYearReportStatus = 'Submitted';
-      project.oneYearSubmittedAt = new Date();
+      installment.status = 'Released';
+      installment.releasedAt = new Date();
       await project.save();
 
-      const officers = await require('../models/User').find({ role: 'officer' });
-      await Notification.insertMany(
-        officers.map((o) => ({
-          user: o._id,
-          message: `1-year report submitted for ${project.fundingNumber}`,
-          link: `/officer/funding/${project._id}`,
-        }))
-      );
+      const allReleased = project.installments.every((i) => i.status === 'Released');
+      if (allReleased) {
+        project.projectStatus = 'Completed';
+        await project.save();
+      }
 
-      res.json({ message: '1-year report submitted', project });
+      await Notification.create({
+        user: project.researcher,
+        message: `"${installment.label}" (৳${installment.amount.toLocaleString()}) released for ${project.fundingNumber}`,
+        link: `/proposals/funded/${project._id}`,
+      });
+
+      res.json({ message: 'Installment released', project });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: 'Server error submitting report' });
+      res.status(500).json({ message: 'Server error releasing installment' });
     }
   }
 );
 
-// PATCH officer approves 6-month report and releases remaining funds
-router.patch('/:id/approve-six-month', authMiddleware, requireOfficer, async (req, res) => {
+// PATCH officer adds a new installment to an existing project (flexibility for mid-project changes)
+router.patch('/:id/installments', authMiddleware, requireOfficer, async (req, res) => {
   try {
+    const { label, percent, dueMonths, reportRequired } = req.body;
     const project = await FundedProject.findById(req.params.id);
     if (!project) {
       return res.status(404).json({ message: 'Funded project not found' });
     }
 
-    project.sixMonthReportStatus = 'Approved';
-    const remaining = project.totalAmount - project.initialDisbursed;
-    project.sixMonthDisbursed = remaining;
-    project.disbursementStatus = '6-month Approved';
+    project.installments.push({
+      label,
+      percent: Number(percent),
+      amount: Math.round((project.totalAmount * Number(percent)) / 100),
+      dueMonths: Number(dueMonths) || 0,
+      reportRequired: reportRequired !== false,
+      status: 'Pending',
+    });
     await project.save();
 
-    await Notification.create({
-      user: project.researcher,
-      message: `Your 6-month report for ${project.fundingNumber} was approved. Remaining funds released.`,
-      link: `/proposals/funded/${project._id}`,
-    });
-
-    res.json({ message: '6-month report approved, funds released', project });
+    res.json({ message: 'Installment added', project });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error approving report' });
+    res.status(500).json({ message: 'Server error adding installment' });
   }
 });
 
-// PATCH officer approves 1-year report (marks project completed)
-router.patch('/:id/approve-one-year', authMiddleware, requireOfficer, async (req, res) => {
-  try {
-    const project = await FundedProject.findById(req.params.id);
-    if (!project) {
-      return res.status(404).json({ message: 'Funded project not found' });
-    }
-
-    project.oneYearReportStatus = 'Approved';
-    project.disbursementStatus = 'Fully Disbursed';
-    project.projectStatus = 'Completed';
-    await project.save();
-
-    await Notification.create({
-      user: project.researcher,
-      message: `Your 1-year report for ${project.fundingNumber} was approved. Project marked complete.`,
-      link: `/proposals/funded/${project._id}`,
-    });
-
-    res.json({ message: '1-year report approved, project completed', project });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error approving report' });
-  }
-});
-
-// PATCH officer updates publication info
 router.patch('/:id/publication', authMiddleware, requireOfficer, async (req, res) => {
   try {
     const { publicationStatus, journalName, publicationLink } = req.body;
@@ -284,7 +273,6 @@ router.patch('/:id/publication', authMiddleware, requireOfficer, async (req, res
   }
 });
 
-// PATCH officer adjusts total amount
 router.patch('/:id/amount', authMiddleware, requireOfficer, async (req, res) => {
   try {
     const { totalAmount } = req.body;
@@ -300,6 +288,25 @@ router.patch('/:id/amount', authMiddleware, requireOfficer, async (req, res) => 
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error updating amount' });
+  }
+});
+// GET funded project by proposal id (for researcher's "View Funding" link)
+router.get('/by-proposal/:proposalId', authMiddleware, async (req, res) => {
+  try {
+    const project = await FundedProject.findOne({ proposal: req.params.proposalId });
+    if (!project) {
+      return res.status(404).json({ message: 'No funding found for this proposal' });
+    }
+    if (
+      req.user.role !== 'officer' &&
+      project.researcher.toString() !== req.user.id
+    ) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+    res.json({ project });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

@@ -3,6 +3,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const User = require('../models/User');
+const multer = require('multer');
+const avatarUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, `${Date.now()}-avatar-${file.originalname}`),
+  }),
+});
 
 router.post('/register', async (req, res) => {
   try {
@@ -153,14 +160,16 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// PATCH update own profile
 router.patch('/me', authMiddleware, async (req, res) => {
   try {
-    const { name, department, bio } = req.body;
+    const allowed = [
+      'name', 'department', 'designation', 'bio',
+      'phone', 'researchInterests', 'expertise', 'profileLink',
+    ];
     const updates = {};
-    if (name) updates.name = name;
-    if (department !== undefined) updates.department = department;
-    if (bio !== undefined) updates.bio = bio;
+    allowed.forEach((k) => {
+      if (req.body[k] !== undefined) updates[k] = req.body[k];
+    });
 
     const user = await User.findByIdAndUpdate(req.user.id, updates, {
       new: true,
@@ -170,6 +179,23 @@ router.patch('/me', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error updating profile' });
+  }
+});
+
+router.post('/me/avatar', authMiddleware, avatarUpload.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image uploaded' });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { avatar: req.file.filename },
+      { new: true }
+    ).select('-password');
+    res.json({ message: 'Avatar updated', user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error uploading avatar' });
   }
 });
 module.exports = router;

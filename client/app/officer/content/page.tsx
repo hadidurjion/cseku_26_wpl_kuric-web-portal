@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import EmptyState from "@/components/EmptyState";
 import { getToken, getStoredUser } from "@/lib/auth";
 import {
   getContent,
@@ -35,6 +36,7 @@ export default function ContentManagementPage() {
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -66,6 +68,7 @@ export default function ContentManagementPage() {
     setYear("");
     setCategory("");
     setStatus("");
+    setImageFile(null);
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -85,7 +88,7 @@ export default function ContentManagementPage() {
       if (activeType === "research" && category) payload.category = category;
       if (activeType === "research" && status) payload.status = status;
 
-      const newItem = await createContent(payload, token);
+      const newItem = await createContent(payload, token, imageFile);
       setItems((prev) => [newItem, ...prev]);
       resetForm();
     } catch (err) {
@@ -213,6 +216,17 @@ export default function ContentManagementPage() {
               </select>
             </div>
           )}
+          <div>
+            <label className="block text-xs text-muted font-semibold mb-1">
+              Thumbnail (optional)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+              className="text-sm"
+            />
+          </div>
           <button
             type="submit"
             disabled={saving}
@@ -249,7 +263,10 @@ export default function ContentManagementPage() {
             </div>
           ))}
           {!loading && items.length === 0 && (
-            <p className="text-sm text-muted">No {activeType} items yet.</p>
+            <EmptyState
+              message={`No ${activeType} items yet.`}
+              hint="Add a new item using the form above."
+            />
           )}
         </div>
       </div>

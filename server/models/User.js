@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  avatar: { type: String, default: '' },
+  phone: { type: String, default: '' },
+  researchInterests: { type: String, default: '' },
+  profileLink: { type: String, default: '' },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

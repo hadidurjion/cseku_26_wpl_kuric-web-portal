@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/lib/api";
+import AuthShell from "@/components/AuthShell";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,85 +35,69 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-md bg-surface border border-border rounded-2xl shadow-sm p-8">
-        <Link href="/" className="flex items-center gap-2 mb-6">
-          <div className="w-7 h-7 rounded-md bg-teal" />
-          <span className="font-serif-brand font-bold text-lg text-ink">
-            KURIC
-          </span>
-        </Link>
+    <AuthShell title="Welcome back" subtitle="Log in to manage your proposals.">
+      {error && (
+        <div className="mb-4 rounded-lg border border-danger bg-danger-tint text-danger px-4 py-2 text-sm">
+          {error}
+        </div>
+      )}
 
-        <h1 className="font-serif-brand text-2xl font-bold text-teal-dark mb-1">
-          Welcome back
-        </h1>
-        <p className="text-sm text-body mb-6">
-          Log in to manage your proposals.
-        </p>
+      <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+        <div>
+          <label className="block text-sm font-medium text-ink mb-1">
+            Email
+          </label>
+          <input
+            name="email"
+            type="email"
+            required
+            value={form.email}
+            onChange={handleChange}
+            autoComplete="new-email"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+            placeholder="you@ku.ac.bd"
+          />
+        </div>
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-danger bg-danger-tint text-danger px-4 py-2 text-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-          <div>
-            <label className="block text-sm font-medium text-ink mb-1">
-              Email
-            </label>
-            <input
-              name="email"
-              type="email"
-              required
-              value={form.email}
-              onChange={handleChange}
-	      autoComplete="new-email"
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
-              placeholder="you@ku.ac.bd"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-ink mb-1">
-              Password
-            </label>
-            <input
-              name="password"
-              type="password"
-              required
-              value={form.password}
-              onChange={handleChange}
-              autoComplete="new-password"
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
-              placeholder="Your password"
-            />
-          </div>
-          <div className="text-right -mt-2">
-            <Link
-              href="/forgot-password"
-              className="text-xs text-teal-dark font-semibold"
-            >
-              Forgot password?
-            </Link>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-teal hover:bg-teal-dark text-white font-semibold rounded-lg py-2.5 text-sm transition-colors disabled:opacity-60"
+        <div>
+          <label className="block text-sm font-medium text-ink mb-1">
+            Password
+          </label>
+          <input
+            name="password"
+            type="password"
+            required
+            value={form.password}
+            onChange={handleChange}
+            autoComplete="new-password"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+            placeholder="Your password"
+          />
+        </div>
+        <div className="text-right -mt-2">
+          <Link
+            href="/forgot-password"
+            className="text-xs text-teal-dark font-semibold"
           >
-            {loading ? "Logging in..." : "Log in"}
-          </button>
-        </form>
-
-        <p className="text-sm text-body mt-6 text-center">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-teal-dark font-semibold">
-            Register
+            Forgot password?
           </Link>
-        </p>
-      </div>
-    </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-teal hover:bg-teal-dark text-white font-semibold rounded-lg py-2.5 text-sm transition-colors disabled:opacity-60"
+        >
+          {loading ? "Logging in..." : "Log in"}
+        </button>
+      </form>
+
+      <p className="text-sm text-body mt-6 text-center">
+        Don&apos;t have an account?{" "}
+        <Link href="/register" className="text-teal-dark font-semibold">
+          Register
+        </Link>
+      </p>
+    </AuthShell>
   );
 }

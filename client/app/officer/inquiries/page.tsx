@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getToken, getStoredUser } from "@/lib/auth";
-import { getInquiries, Inquiry } from "@/lib/api";
+import { getInquiries, markInquiryRead, Inquiry } from "@/lib/api";
 
 export default function InquiriesPage() {
   const router = useRouter();
@@ -72,9 +72,30 @@ export default function InquiriesPage() {
                   {new Date(inq.createdAt).toLocaleString()}
                 </div>
               </div>
-              <p className="text-sm text-ink leading-relaxed">
+              <p className="text-sm text-ink leading-relaxed mb-3">
                 {inq.message}
               </p>
+              <div className="flex gap-3">
+                <a
+                  href={`mailto:${inq.email}?subject=Re: Your inquiry to KURIC&body=Hi ${inq.name},%0D%0A%0D%0A`}
+                  className="text-xs font-semibold text-teal-dark hover:underline"
+                >
+                  Reply by email
+                </a>
+                <button
+                  onClick={async () => {
+                    const token = getToken();
+                    if (!token) return;
+                    await markInquiryRead(inq._id, token);
+                    setInquiries((prev) =>
+                      prev.map((i) => (i._id === inq._id ? { ...i, read: true } : i))
+                    );
+                  }}
+                  className="text-xs font-semibold text-muted hover:underline"
+                >
+                  Mark as read
+                </button>
+              </div>
             </div>
           ))}
         </div>

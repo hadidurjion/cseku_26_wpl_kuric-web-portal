@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Settings = require('../models/Settings');
 const authMiddleware = require('../middleware/authMiddleware');
+const Proposal = require('../models/Proposal');
+const FundedProject = require('../models/FundedProject');
+const Content = require('../models/Content');
 
 function requireOfficer(req, res, next) {
   if (req.user.role !== 'officer') {
@@ -61,6 +64,34 @@ router.put('/', authMiddleware, requireOfficer, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error updating settings' });
+  }
+});
+// GET live homepage statistics (public)
+router.get('/stats', async (req, res) => {
+  try {
+    const [totalProposals, underReview, accepted, publications, funded] =
+      await Promise.all([
+        Proposal.countDocuments({ status: { $ne: 'Draft' } }),
+        Proposal.countDocuments({ status: 'Under Review' }),
+        Proposal.countDocuments({ status: 'Accepted' }),
+        Content.countDocuments({ type: 'publication' }),
+        FundedProject.find(),
+      ]);
+
+    const activeProjects = funded.filter((f) => f.projectStatus === 'Active').length;
+    const fundedAmount = funded.reduce(
+      (sum, f) =>
+        sum +
+        f.installments
+          .filter((i) => i.status === 'Released')
+          .reduce((s, i) => s + (i.amount || 0), 0),
+      0
+    );
+
+    res.json({ totalProposals, underReview, accepted, activeProjects, publications, fundedAmount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error fetching stats' });
   }
 });
 

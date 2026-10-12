@@ -7,7 +7,6 @@ import Footer from "@/components/Footer";
 import { getToken, getStoredUser } from "@/lib/auth";
 import { getAllUsers, updateUserRole, updateUserStatus, adminResetPassword, ManagedUser } from "@/lib/api";
 
-
 const roleStyles: Record<string, string> = {
   researcher: "bg-[#EFEBE0] text-muted",
   reviewer: "bg-teal-tint text-teal-dark",
@@ -20,6 +19,7 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const currentUser = getStoredUser();
@@ -75,6 +75,16 @@ export default function UserManagementPage() {
     }
   }
 
+  // Search Filter: Name, Email, অথবা Role ফিল্ড দিয়ে সার্চ করা যাবে
+  const filteredUsers = users.filter((u) => {
+    const term = searchTerm.toLowerCase();
+    const matchesName = u.name?.toLowerCase().includes(term);
+    const matchesEmail = u.email?.toLowerCase().includes(term);
+    const matchesRole = u.role?.toLowerCase().includes(term);
+
+    return matchesName || matchesEmail || matchesRole;
+  });
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -87,6 +97,14 @@ export default function UserManagementPage() {
           View all accounts, assign roles, and enable or disable access.
         </p>
 
+        {/* Search Input */}
+        <input
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by name, email, or role..."
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal mb-4"
+        />
+
         {loading && <p className="text-sm text-muted">Loading users...</p>}
         {error && (
           <div className="mb-4 rounded-lg border border-danger bg-danger-tint text-danger px-4 py-2 text-sm">
@@ -94,18 +112,25 @@ export default function UserManagementPage() {
           </div>
         )}
 
+        {!loading && !error && users.length > 0 && filteredUsers.length === 0 && (
+          <div className="text-sm text-muted border border-dashed border-[#C9C2AE] rounded-xl p-6 text-center mb-4">
+            No users found matching &quot;{searchTerm}&quot;.
+          </div>
+        )}
+
         <div className="bg-surface border border-border rounded-xl overflow-hidden">
-          <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr] px-4 py-2.5 text-[11.5px] text-muted font-bold bg-[#F0EEE6]">
+          <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1.2fr] px-4 py-2.5 text-[11.5px] text-muted font-bold bg-[#F0EEE6]">
             <span>Name</span>
             <span>Email</span>
             <span>Role</span>
             <span>Status</span>
-            <span></span>
+            <span>Actions</span>
           </div>
-          {users.map((u) => (
+
+          {filteredUsers.map((u) => (
             <div
               key={u._id}
-              className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr] px-4 py-3.5 text-sm items-center border-t border-border"
+              className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1.2fr] px-4 py-3.5 text-sm items-center border-t border-border"
             >
               <span className="font-medium text-ink">{u.name}</span>
               <span className="text-body text-xs">{u.email}</span>
@@ -130,14 +155,8 @@ export default function UserManagementPage() {
               >
                 {u.active ? "Active" : "Disabled"}
               </span>
-              <button
-                onClick={() => handleStatusToggle(u._id, u.active)}
-                disabled={updatingId === u._id}
-                className="text-xs font-semibold text-teal-dark hover:underline text-left"
-              >
-                {u.active ? "Disable" : "Activate"}
-              </button>
-	                    <div className="flex flex-col gap-1">
+
+              <div className="flex flex-col gap-1">
                 <button
                   onClick={() => handleStatusToggle(u._id, u.active)}
                   disabled={updatingId === u._id}
