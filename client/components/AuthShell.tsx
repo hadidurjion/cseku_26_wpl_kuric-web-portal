@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { siteConfig } from "@/lib/siteConfig";
 
 export default function AuthShell({
   title,
@@ -32,15 +33,15 @@ export default function AuthShell({
 
         <Link href="/" className="relative z-10 flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-white/90" />
-          <span className="font-serif-brand font-bold text-xl">KURIC</span>
+          <span className="font-serif-brand font-bold text-xl">{siteConfig.shortName}</span>
         </Link>
 
         <div className="relative z-10">
           <div className="text-[11px] tracking-widest uppercase font-bold text-gold-tint mb-3">
-            Khulna University
+            {siteConfig.institutionName}
           </div>
           <h2 className="font-serif-brand text-4xl font-bold leading-tight mb-4">
-            Research and Innovation Center
+            {siteConfig.centerName}
           </h2>
           <p className="text-white/80 text-sm max-w-sm leading-relaxed">
             Submit proposals, follow reviews, and track funded research, all in
@@ -49,7 +50,7 @@ export default function AuthShell({
         </div>
 
         <div className="relative z-10 text-xs text-white/60">
-          &copy; Khulna University
+          &copy; {siteConfig.institutionName}
         </div>
       </div>
 
@@ -58,7 +59,7 @@ export default function AuthShell({
           <Link href="/" className="md:hidden flex items-center gap-2 mb-6">
             <div className="w-7 h-7 rounded-md bg-teal" />
             <span className="font-serif-brand font-bold text-lg text-ink">
-              KURIC
+              {siteConfig.shortName}
             </span>
           </Link>
           <h1 className="font-serif-brand text-3xl font-bold text-teal-dark mb-1">

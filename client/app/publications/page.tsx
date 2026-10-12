@@ -1,5 +1,6 @@
 "use client";
 
+import { siteConfig } from "@/lib/siteConfig";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -26,7 +27,7 @@ export default function PublicationsPage() {
       <PageHeader
         eyebrow="Library"
         title="Publications"
-        subtitle="Browse scholarly work, journal articles, and research papers published by Khulna University faculty."
+        subtitle={`Browse scholarly work, journal articles, and research papers published by ${siteConfig.institutionName} faculty.`}
         icon={<IconBook />}
       />
 

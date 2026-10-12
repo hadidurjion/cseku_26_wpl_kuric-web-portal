@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { siteConfig } from "@/lib/siteConfig";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -27,7 +28,7 @@ export default function GalleryPage() {
       <PageHeader
         eyebrow="Moments"
         title="Gallery"
-        subtitle="Events, workshops and life at KURIC."
+        subtitle={`Events, workshops and life at ${siteConfig.shortName}.`}
         icon={<IconImage />}
       />
 

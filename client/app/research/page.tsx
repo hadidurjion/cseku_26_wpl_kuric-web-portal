@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { siteConfig } from "@/lib/siteConfig";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -43,7 +44,7 @@ export default function ResearchPage() {
       <PageHeader
         eyebrow="Explore"
         title="Research areas"
-        subtitle="Discover research projects and multidisciplinary initiatives at Khulna University."
+        subtitle={`Discover research projects and multidisciplinary initiatives at ${siteConfig.institutionName}.`}
         icon={<IconSearch />}
       />
 

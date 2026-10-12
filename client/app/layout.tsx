@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import ChatbotWidget from "@/components/ChatbotWidget";
+import { siteConfig } from "@/lib/siteConfig";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,17 +19,17 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "KURIC Web Portal",
-  description: "Khulna University Research and Innovation Center",
+  title: `${siteConfig.shortName} Web Portal - ${siteConfig.centerName}`,
+  description: `${siteConfig.institutionName} ${siteConfig.centerName}`,
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
-            <body className="min-h-full flex flex-col antialiased">
+      <body className="min-h-full flex flex-col antialiased">
         {children}
         <ChatbotWidget />
       </body>

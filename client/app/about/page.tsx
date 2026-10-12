@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { siteConfig } from "@/lib/siteConfig";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { IconInfo } from "@/components/Icons";
+import Link from "next/link";
 import {
   getHomepageSettings,
   getStaff,
@@ -38,7 +39,7 @@ function Person({ m, big }: { m: StaffMember; big?: boolean }) {
       <div className="min-w-0">
         <div className="font-bold text-sm text-ink">{m.name}</div>
         <div className="text-xs text-teal-dark font-semibold mb-1">
-          {m.designation}
+          {m.designation.replace(/KURIC|RIC/g, siteConfig.shortName)}
         </div>
         {m.startDate && (
           <div className="text-xs text-muted">Since {yr(m.startDate)}</div>
@@ -74,7 +75,7 @@ export default function AboutPage() {
       ? ({
           _id: "fallback",
           name: settings.directorName,
-          designation: settings.directorTitle || "Director",
+          designation: settings.directorTitle || `Director, ${siteConfig.shortName}`,
           category: "director",
           startDate: "",
         } as StaffMember)
@@ -92,8 +93,8 @@ export default function AboutPage() {
       <Navbar />
       <PageHeader
         eyebrow="About us"
-        title="Our mission at KURIC"
-        subtitle="Supporting research across Khulna University."
+        title={`Our mission at ${siteConfig.shortName}`}
+        subtitle={`Supporting research across ${siteConfig.institutionName}.`}
         icon={<IconInfo />}
       />
 
@@ -101,7 +102,7 @@ export default function AboutPage() {
         <Reveal>
           <p className="text-sm text-body leading-relaxed mb-8 max-w-2xl">
             {settings?.aboutMission ||
-              "We advance research culture at Khulna University by supporting proposal development, funding pathways, and interdisciplinary collaboration across departments."}
+              `We advance research culture at ${siteConfig.institutionName} by supporting proposal development, funding pathways, and interdisciplinary collaboration across departments.`}
           </p>
         </Reveal>
 
@@ -129,6 +130,46 @@ export default function AboutPage() {
           </Reveal>
         )}
 
+        {/* Developers & Supervisor Section */}
+        <Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 pt-4 border-t border-border">
+            {/* Developers */}
+            <div>
+              <div className="text-[11px] tracking-widest uppercase text-muted font-bold mb-3">
+                Developed By
+              </div>
+              <div className="space-y-3">
+                <div className="bg-surface border border-border rounded-xl p-4">
+                  <div className="font-bold text-sm text-ink">1. Sadia Afrin Tamanna</div>
+                  <a href="mailto:st2011321@gmail.com" className="text-xs text-teal-dark hover:underline block mt-1">
+                    st2011321@gmail.com
+                  </a>
+                </div>
+                <div className="bg-surface border border-border rounded-xl p-4">
+                  <div className="font-bold text-sm text-ink">2. Hadidur Rahman Jion</div>
+                  <a href="mailto:hadidurjion04@gmail.com" className="text-xs text-teal-dark hover:underline block mt-1">
+                    hadidurjion04@gmail.com
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Supervisor */}
+            <div>
+              <div className="text-[11px] tracking-widest uppercase text-muted font-bold mb-3">
+                Supervisor
+              </div>
+              <div className="bg-surface border border-border rounded-xl p-4">
+                <div className="font-bold text-sm text-ink">Prof. Dr. Kazi Masudul Alam</div>
+                <div className="text-xs text-teal-dark font-semibold mt-0.5">Director</div>
+                <a href="mailto:kazi@cse.ku.ac.bd" className="text-xs text-teal-dark hover:underline block mt-1">
+                  kazi@cse.ku.ac.bd
+                </a>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
         {past.length > 0 && (
           <Reveal>
             <div className="text-[11px] tracking-widest uppercase text-muted font-bold mb-2.5">
@@ -154,7 +195,17 @@ export default function AboutPage() {
         )}
       </div>
 
-      <Footer />
+      {/* Built-in Dynamic Footer Inside About Page */}
+      <footer className="bg-surface border-t border-border py-6 px-10 text-center text-xs text-muted flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          &copy; {new Date().getFullYear()} {siteConfig.institutionName} {siteConfig.centerName}
+        </div>
+        <div className="flex gap-6">
+          <Link href="/about" className="hover:text-teal-dark">About</Link>
+          <Link href="/contact" className="hover:text-teal-dark">Contact</Link>
+          <Link href="/publications" className="hover:text-teal-dark">Publications</Link>
+        </div>
+      </footer>
     </div>
   );
 }

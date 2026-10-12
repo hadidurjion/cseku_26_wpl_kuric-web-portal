@@ -1,5 +1,6 @@
 "use client";
 
+import { siteConfig } from "@/lib/siteConfig";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -111,17 +112,16 @@ export default function HomePage() {
 
         <div className="relative z-10">
           <div className="text-[11.5px] tracking-widest uppercase text-muted font-bold mb-3.5">
-            Khulna University
+            {siteConfig.institutionName}
           </div>
           <div className="font-serif-brand text-2xl font-semibold text-body mb-1">
-            Research and Innovation Center
+            {siteConfig.centerName}
           </div>
           <h1 className="font-serif-brand text-4xl md:text-5xl font-bold text-teal-dark leading-tight max-w-xl mx-auto mb-4">
             {tagline}
           </h1>
           <p className="text-sm text-body max-w-md mx-auto mb-6 leading-relaxed">
-            Submit, review, and track research at Khulna University &mdash; all
-            in one place.
+            {siteConfig.description}
           </p>
           <div className="flex gap-3 justify-center">
             <Link
@@ -231,7 +231,17 @@ export default function HomePage() {
         )}
       </div>
 
-      <Footer />
+      {/* Footer updated dynamically with siteConfig */}
+      <footer className="bg-surface border-t border-border py-6 px-10 text-center text-xs text-muted flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          &copy; {new Date().getFullYear()} {siteConfig.institutionName} {siteConfig.centerName}
+        </div>
+        <div className="flex gap-6">
+          <Link href="/about" className="hover:text-teal-dark">About</Link>
+          <Link href="/contact" className="hover:text-teal-dark">Contact</Link>
+          <Link href="/publications" className="hover:text-teal-dark">Publications</Link>
+        </div>
+      </footer>
     </div>
   );
 }

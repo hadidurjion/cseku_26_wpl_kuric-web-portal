@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { siteConfig } from "@/lib/siteConfig";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -45,7 +46,7 @@ export default function ContactPage() {
       <PageHeader
         eyebrow="Reach us"
         title="Get in touch"
-        subtitle="Questions, partnerships or feedback, we would love to hear from you."
+        subtitle={`Questions, partnerships or feedback regarding ${siteConfig.shortName}, we would love to hear from you.`}
         icon={<IconMail />}
       />
 
@@ -115,11 +116,11 @@ export default function ContactPage() {
               style={{ border: 0 }}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="KURIC location map"
+              title={`${siteConfig.shortName} location map`}
             />
           </div>
           <div className="text-sm text-ink font-medium leading-loose">
-            {settings?.contactAddress || "Khulna University, Khulna 9208"}
+            {settings?.contactAddress || `${siteConfig.institutionName}, Khulna 9208`}
             <br />
             {settings?.contactEmail || "kuric@ku.ac.bd"}
             <br />

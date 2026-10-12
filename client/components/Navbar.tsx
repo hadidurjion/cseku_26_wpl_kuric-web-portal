@@ -1,5 +1,6 @@
 "use client";
 
+import { siteConfig } from "@/lib/siteConfig";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -79,7 +80,7 @@ export default function Navbar() {
       <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
         <div className="w-7 h-7 rounded-md bg-teal" />
         <span className="font-serif-brand font-bold text-base text-ink">
-          KURIC
+          {siteConfig.shortName}
         </span>
       </Link>
 
@@ -108,7 +109,7 @@ export default function Navbar() {
           </Link>
         )}
 
-                <div
+        <div
           className={`relative ${user ? "" : "lg:hidden"}`}
           ref={wrapperRef}
         >
@@ -169,7 +170,7 @@ export default function Navbar() {
                 </div>
               )}
 
-             {user && (
+              {user && (
                 <button
                   onClick={handleLogout}
                   className="block w-full text-left px-4 py-2.5 text-sm text-danger hover:bg-danger-tint transition-colors border-t border-border"

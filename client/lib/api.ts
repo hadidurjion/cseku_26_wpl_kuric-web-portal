@@ -27,7 +27,7 @@ export interface AuthResponse {
 }
 
 async function handleResponse(res: Response): Promise<AuthResponse> {
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.message || "Something went wrong");
   }
@@ -69,7 +69,7 @@ export async function submitProposal(formData: FormData, token: string) {
       },
       body: formData,
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.message || "Failed to submit proposal");
     }
@@ -120,7 +120,7 @@ export async function getProposalDetail(id: string, token: string) {
     const res = await fetch(`${API_BASE}/reviews/proposal/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to fetch proposal");
     return data.proposal as ProposalDetail;
   } catch (error: any) {
@@ -143,7 +143,7 @@ export async function submitDecision(
       },
       body: JSON.stringify({ decision, comment }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to submit decision");
     return data;
   } catch (error: any) {
@@ -210,7 +210,7 @@ export async function assignReviewer(
       },
       body: JSON.stringify({ reviewerId }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to assign reviewer");
     return data;
   } catch (error: any) {
@@ -230,17 +230,19 @@ export interface ContentItem {
   image?: string;
 }
 
-export async function getContent(type: string) {
+export async function getContent(type: string): Promise<ContentItem[]> {
   try {
-    const res = await fetch(`${API_BASE}/content?type=${type}`);
+    const res = await fetch(`${API_BASE}/content?type=${type}`, {
+      cache: "no-store",
+    });
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || "Failed to fetch content");
+      return [];
     }
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     return (data.items || []) as ContentItem[];
   } catch (error) {
-    console.error(`getContent error for type ${type}:`, error);
+    // Prevent unhandled network fetch errors from crashing the page
+    console.warn(`getContent network warning for type ${type}:`, error);
     return [];
   }
 }
@@ -250,18 +252,22 @@ export async function createContent(
   token: string,
   imageFile?: File | null
 ) {
-  const fd = new FormData();
-  Object.entries(item).forEach(([k, v]) => fd.append(k, v));
-  if (imageFile) fd.append("image", imageFile);
+  try {
+    const fd = new FormData();
+    Object.entries(item).forEach(([k, v]) => fd.append(k, v));
+    if (imageFile) fd.append("image", imageFile);
 
-  const res = await fetch(`${API_BASE}/content`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    body: fd,
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to create content");
-  return data.item as ContentItem;
+    const res = await fetch(`${API_BASE}/content`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || "Failed to create content");
+    return data.item as ContentItem;
+  } catch (error: any) {
+    throw new Error(error.message === "Failed to fetch" ? "Unable to connect to server" : error.message);
+  }
 }
 
 export function imageUrl(filename?: string) {
@@ -276,7 +282,7 @@ export async function deleteContent(id: string, token: string) {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to delete content");
     return data;
   } catch (error: any) {
@@ -316,7 +322,7 @@ export async function markNotificationsRead(token: string) {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}` },
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to mark read");
     return data;
   } catch (error: any) {
@@ -338,7 +344,7 @@ export async function resubmitProposal(
       },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to resubmit");
     return data;
   } catch (error: any) {
@@ -399,7 +405,7 @@ export async function updateUserRole(id: string, role: string, token: string) {
       },
       body: JSON.stringify({ role }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to update role");
     return data;
   } catch (error: any) {
@@ -421,7 +427,7 @@ export async function updateUserStatus(
       },
       body: JSON.stringify({ active }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to update status");
     return data;
   } catch (error: any) {
@@ -443,7 +449,7 @@ export async function submitAppeal(
       },
       body: JSON.stringify({ appealText }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to submit appeal");
     return data;
   } catch (error: any) {
@@ -492,7 +498,7 @@ export async function resolveAppeal(
       },
       body: JSON.stringify({ decision, response }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to resolve appeal");
     return data;
   } catch (error: any) {
@@ -507,7 +513,7 @@ export async function forgotPassword(email: string) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to process request");
     return data;
   } catch (error: any) {
@@ -522,7 +528,7 @@ export async function resetPassword(token: string, newPassword: string) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, newPassword }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to reset password");
     return data;
   } catch (error: any) {
@@ -550,7 +556,7 @@ export async function getMyProfile(token: string) {
     const res = await fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to fetch profile");
     return data.user as FullProfile;
   } catch (error: any) {
@@ -571,7 +577,7 @@ export async function updateMyProfile(
       },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to update profile");
     return data;
   } catch (error: any) {
@@ -620,7 +626,7 @@ export async function updateHomepageSettings(
       },
       body: JSON.stringify(settings),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to update settings");
     return data;
   } catch (error: any) {
@@ -642,7 +648,7 @@ export async function adminResetPassword(
       },
       body: JSON.stringify({ newPassword }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to reset password");
     return data;
   } catch (error: any) {
@@ -668,7 +674,7 @@ export async function searchContent(query: string) {
 export async function getContentItem(id: string) {
   try {
     const res = await fetch(`${API_BASE}/content/item/${id}`, { cache: "no-store" });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to fetch item");
     return data.item as ContentItem;
   } catch (error: any) {
@@ -713,7 +719,7 @@ export async function submitInquiry(payload: {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || "Failed to submit");
     return data;
   } catch (error: any) {
@@ -754,7 +760,7 @@ export async function getEligibleProposals(token: string) {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch");
   return data.proposals;
 }
@@ -773,7 +779,7 @@ export async function createFunding(
     },
     body: JSON.stringify({ proposalId, totalAmount, installments }),
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to create funding");
   return data;
 }
@@ -783,7 +789,7 @@ export async function getAllFundedProjects(token: string) {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch");
   return data.projects as FundedProject[];
 }
@@ -793,7 +799,7 @@ export async function getFundedProject(id: string, token: string) {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch");
   return data.project as FundedProject;
 }
@@ -803,7 +809,7 @@ export async function getMyFundedProjects(token: string) {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch");
   return data.projects as FundedProject[];
 }
@@ -817,7 +823,7 @@ export async function releaseInstallment(
     `${API_BASE}/funding/${projectId}/installments/${installmentId}/release`,
     { method: "PATCH", headers: { Authorization: `Bearer ${token}` } }
   );
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to release");
   return data;
 }
@@ -835,7 +841,7 @@ export async function addInstallment(
     },
     body: JSON.stringify(payload),
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to add installment");
   return data;
 }
@@ -853,7 +859,7 @@ export async function updatePublication(
     },
     body: JSON.stringify(payload),
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to update");
   return data;
 }
@@ -867,7 +873,7 @@ export async function updateFundingAmount(id: string, totalAmount: number, token
     },
     body: JSON.stringify({ totalAmount }),
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to update");
   return data;
 }
@@ -877,7 +883,7 @@ export async function markInquiryRead(id: string, token: string) {
     method: "PATCH",
     headers: { Authorization: `Bearer ${token}` },
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed");
   return data;
 }
@@ -887,7 +893,7 @@ export async function getFundingByProposal(proposalId: string, token: string) {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Not found");
   return data.project as FundedProject;
 }
@@ -903,7 +909,7 @@ export interface PublicStats {
 
 export async function getPublicStats() {
   const res = await fetch(`${API_BASE}/settings/stats`, { cache: "no-store" });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch stats");
   return data as PublicStats;
 }
@@ -916,7 +922,7 @@ export async function uploadAvatar(file: File, token: string) {
     headers: { Authorization: `Bearer ${token}` },
     body: fd,
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to upload photo");
   return data.user as FullProfile;
 }
@@ -940,7 +946,7 @@ export interface StaffMember {
 
 export async function getStaff() {
   const res = await fetch(`${API_BASE}/staff`, { cache: "no-store" });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch staff");
   return data.staff as StaffMember[];
 }
@@ -951,7 +957,7 @@ export async function createStaff(payload: Record<string, string>, token: string
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to add");
   return data;
 }
@@ -962,7 +968,7 @@ export async function endStaffTenure(id: string, token: string) {
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({}),
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed");
   return data;
 }
@@ -972,7 +978,7 @@ export async function deleteStaff(id: string, token: string) {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed");
   return data;
 }
@@ -986,7 +992,7 @@ export interface GalleryImage {
 
 export async function getGallery() {
   const res = await fetch(`${API_BASE}/gallery`, { cache: "no-store" });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch gallery");
   return data.images as GalleryImage[];
 }
@@ -1000,7 +1006,7 @@ export async function uploadGalleryImages(files: File[], caption: string, token:
     headers: { Authorization: `Bearer ${token}` },
     body: fd,
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Upload failed");
   return data;
 }
@@ -1010,7 +1016,7 @@ export async function deleteGalleryImage(id: string, token: string) {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed");
   return data;
 }
