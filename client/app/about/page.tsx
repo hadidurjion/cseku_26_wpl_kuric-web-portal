@@ -157,10 +157,10 @@ export default function AboutPage() {
             {/* Supervisor */}
             <div>
               <div className="text-[11px] tracking-widest uppercase text-muted font-bold mb-3">
-                Supervisor
+                Supervised by
               </div>
               <div className="bg-surface border border-border rounded-xl p-4">
-                <div className="font-bold text-sm text-ink">Prof. Dr. Kazi Masudul Alam</div>
+                <div className="font-bold text-sm text-ink">Engr. Prof. Dr. Kazi Masudul Alam</div>
                 <div className="text-xs text-teal-dark font-semibold mt-0.5">Director</div>
                 <a href="mailto:kazi@cse.ku.ac.bd" className="text-xs text-teal-dark hover:underline block mt-1">
                   kazi@cse.ku.ac.bd

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { siteConfig } from "@/lib/siteConfig";
@@ -110,7 +110,7 @@ export default function ContactPage() {
         <div className="px-10 py-9 bg-teal-tint">
           <div className="h-48 rounded-xl overflow-hidden border border-border mb-4">
             <iframe
-              src="https://www.google.com/maps?q=Khulna+University,+Khulna,+Bangladesh&output=embed"
+              src={`https://www.google.com/maps?q=${encodeURIComponent(settings?.contactAddress || siteConfig.institutionName + ", Bangladesh")}&output=embed`}
               width="100%"
               height="100%"
               style={{ border: 0 }}
@@ -120,9 +120,9 @@ export default function ContactPage() {
             />
           </div>
           <div className="text-sm text-ink font-medium leading-loose">
-            {settings?.contactAddress || `${siteConfig.institutionName}, Khulna 9208`}
+            {settings?.contactAddress || `${siteConfig.institutionName}, Bangladesh`}
             <br />
-            {settings?.contactEmail || "kuric@ku.ac.bd"}
+            {settings?.contactEmail || "-"}
             <br />
             {settings?.contactPhone || "+880 41-xxxxxx"}
           </div>
@@ -133,3 +133,5 @@ export default function ContactPage() {
     </div>
   );
 }
+
+

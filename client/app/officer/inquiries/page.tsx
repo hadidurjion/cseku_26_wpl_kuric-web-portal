@@ -1,4 +1,5 @@
-"use client";
+﻿"use client";
+import { siteConfig } from "@/lib/siteConfig";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -77,7 +78,7 @@ export default function InquiriesPage() {
               </p>
               <div className="flex gap-3">
                 <a
-                  href={`mailto:${inq.email}?subject=Re: Your inquiry to KURIC&body=Hi ${inq.name},%0D%0A%0D%0A`}
+                  href={`mailto:${inq.email}?subject=Re: Your inquiry to ${siteConfig.shortName}&body=Hi ${inq.name},%0D%0A%0D%0A`}
                   className="text-xs font-semibold text-teal-dark hover:underline"
                 >
                   Reply by email
@@ -105,3 +106,4 @@ export default function InquiriesPage() {
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+﻿const tenantCtx = require('../middleware/tenantCtx');
 const express = require('express');
 const router = express.Router();
 const Content = require('../models/Content');
@@ -31,7 +32,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST create content (officer only)
-router.post('/', authMiddleware, requireOfficer, upload.single('image'), async (req, res) => {
+router.post('/', authMiddleware, requireOfficer, upload.single('image'), tenantCtx, async (req, res) => {
   try {
     const data = { ...req.body, createdBy: req.user.id };
     if (req.file) data.image = req.file.filename;
@@ -43,7 +44,7 @@ router.post('/', authMiddleware, requireOfficer, upload.single('image'), async (
   }
 });
 
-router.put('/:id', authMiddleware, requireOfficer, upload.single('image'), async (req, res) => {
+router.put('/:id', authMiddleware, requireOfficer, upload.single('image'), tenantCtx, async (req, res) => {
   try {
     const data = { ...req.body };
     if (req.file) data.image = req.file.filename;

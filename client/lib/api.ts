@@ -1,4 +1,18 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000/api";
+function resolveApiBase() {
+  const configured = process.env.NEXT_PUBLIC_API_BASE;
+  if (configured?.startsWith("http")) return configured;
+
+  if (typeof window !== "undefined") {
+    const url = new URL(window.location.href);
+    if (url.port === "3000") url.port = "5000";
+    return `${url.origin}/api`;
+  }
+
+  return "http://localhost:5000/api";
+}
+
+const API_BASE = resolveApiBase();
+const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
 
 export interface RegisterPayload {
   name: string;
@@ -241,7 +255,6 @@ export async function getContent(type: string): Promise<ContentItem[]> {
     const data = await res.json().catch(() => ({}));
     return (data.items || []) as ContentItem[];
   } catch (error) {
-    // Prevent unhandled network fetch errors from crashing the page
     console.warn(`getContent network warning for type ${type}:`, error);
     return [];
   }
@@ -272,7 +285,7 @@ export async function createContent(
 
 export function imageUrl(filename?: string) {
   return filename
-    ? "http://localhost:5000/uploads/" + encodeURIComponent(filename)
+    ? `${API_ORIGIN}/uploads/${encodeURIComponent(filename)}`
     : "";
 }
 
@@ -298,22 +311,21 @@ export interface NotificationItem {
   createdAt: string;
 }
 
-export async function getNotifications(token: string) {
+export async function getNotifications(token: string): Promise<{ notifications: NotificationItem[]; unreadCount: number }> {
   try {
     const res = await fetch(`${API_BASE}/notifications`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      console.error("Failed to fetch notifications:", data.message || res.statusText);
-      return { notifications: [], unreadCount: 0 };
+    
+    if (res.ok) {
+      const data = await res.json();
+      return data as { notifications: NotificationItem[]; unreadCount: number };
     }
-    const data = await res.json();
-    return data as { notifications: NotificationItem[]; unreadCount: number };
-  } catch (error) {
-    console.error("getNotifications error:", error);
-    return { notifications: [], unreadCount: 0 };
+  } catch {
+    // Suppress network or parsing exceptions entirely
   }
+  
+  return { notifications: [], unreadCount: 0 };
 }
 
 export async function markNotificationsRead(token: string) {
@@ -598,17 +610,16 @@ export interface HomepageSettings {
   contactPhone?: string;
 }
 
-export async function getHomepageSettings() {
+export async function getHomepageSettings(): Promise<HomepageSettings | null> {
   try {
     const res = await fetch(`${API_BASE}/settings`, { cache: "no-store" });
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || `HTTP error! status: ${res.status}`);
+      return null;
     }
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     return (data.settings || null) as HomepageSettings | null;
   } catch (error: any) {
-    console.error("getHomepageSettings error:", error.message || error);
+    console.warn("getHomepageSettings warning: Unable to connect to server");
     return null;
   }
 }
@@ -929,7 +940,7 @@ export async function uploadAvatar(file: File, token: string) {
 
 export function fileUrl(filename?: string) {
   return filename
-    ? "http://localhost:5000/uploads/" + encodeURIComponent(filename)
+    ? `${API_ORIGIN}/uploads/${encodeURIComponent(filename)}`
     : "";
 }
 
@@ -962,11 +973,11 @@ export async function createStaff(payload: Record<string, string>, token: string
   return data;
 }
 
-export async function endStaffTenure(id: string, token: string) {
+export async function endStaffTenure(id: string, token: string, payload: Record<string, any> = {}) {
   const res = await fetch(`${API_BASE}/staff/${id}/end`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({}),
+    body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed");
@@ -993,7 +1004,7 @@ export interface GalleryImage {
 export async function getGallery() {
   const res = await fetch(`${API_BASE}/gallery`, { cache: "no-store" });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to fetch gallery");
+  if (!res.ok) throw new Error(data.main || "Failed to fetch gallery");
   return data.images as GalleryImage[];
 }
 
@@ -1014,7 +1025,7 @@ export async function uploadGalleryImages(files: File[], caption: string, token:
 export async function deleteGalleryImage(id: string, token: string) {
   const res = await fetch(`${API_BASE}/gallery/${id}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ` + token },
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed");

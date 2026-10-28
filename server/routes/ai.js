@@ -1,3 +1,4 @@
+﻿const Institution = require('../models/Institution');
 const express = require('express');
 const router = express.Router();
 const { askClaude } = require('../services/aiService');
@@ -13,9 +14,13 @@ router.post('/chatbot', async (req, res) => {
       return res.status(400).json({ message: 'A message is required' });
     }
 
-    const systemPrompt = `You are KURIC Assistant, a helpful assistant for the Khulna University Research and Innovation Center web portal. 
-Answer questions about: submitting research proposals (researchers register, then submit title/abstract/objectives/budget/timeline via the "Submit proposal" button), KURIC's research areas (ICT, Environment, Health), publications, events, and how the review process works (Officer assigns a Reviewer, who decides Accept/Revision Needed/Deny). 
-Keep answers short (2-4 sentences), friendly, and specific to KURIC. If you don't know something specific, suggest visiting the Contact page.`;
+    const inst = await Institution.findOne({ _id: req.institutionId }).lean();
+    const orgShort = (inst && inst.shortName ? inst.shortName : 'KU') + 'RIC';
+    const orgName = inst && inst.name ? inst.name : 'Khulna University Research and Innovation Center';
+    const areas = inst && inst.slug === 'ku' ? '(ICT, Environment, Health)' : '(see the Research page; do not invent specific areas)';
+    const systemPrompt = `You are ${orgShort} Assistant, a helpful assistant for the ${orgName} web portal. 
+Answer questions about: submitting research proposals (researchers register, then submit title/abstract/objectives/budget/timeline via the "Submit proposal" button), ${orgShort}'s research areas ${areas}, publications, events, and how the review process works (Officer assigns a Reviewer, who decides Accept/Revision Needed/Deny). 
+Keep answers short (2-4 sentences), friendly, and specific to ${orgShort}. If you don't know something specific, suggest visiting the Contact page.`;
 
     const reply = await askClaude(systemPrompt, message);
     res.json({ reply });
@@ -107,7 +112,7 @@ router.post('/generate-report', authMiddleware, async (req, res) => {
     });
 
     const systemPrompt =
-      'Write a short narrative progress report (3-4 paragraphs) for KURIC leadership summarizing proposal activity. Highlight trends, not just raw numbers. Plain text, no markdown headers.';
+      'Write a short narrative progress report (3-4 paragraphs) for the center leadership summarizing proposal activity. Highlight trends, not just raw numbers. Plain text, no markdown headers.';
     const userMessage = `Total proposals: ${total}\nBy status: ${JSON.stringify(
       byStatus
     )}\nBy department: ${JSON.stringify(byDept)}`;
@@ -121,3 +126,8 @@ router.post('/generate-report', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
+
+
+
+

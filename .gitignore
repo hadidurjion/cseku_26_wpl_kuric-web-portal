@@ -1,0 +1,7 @@
+
+kuric-android/
+server/test-result.txt
+server/queries.txt
+
+android/
+*.log

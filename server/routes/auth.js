@@ -1,3 +1,5 @@
+﻿const tenantCtx = require('../middleware/tenantCtx');
+const Institution = require('../models/Institution');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -13,13 +15,15 @@ const avatarUpload = multer({
 
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, department, designation } = req.body;
+    const { name, email, password, department, designation, institution } = req.body;
+    const inst = await Institution.findOne({ slug: (institution || req.headers['x-institution'] || 'ku').toLowerCase(), status: 'Active' });
+    if (!inst) return res.status(400).json({ message: 'Institution not found' });
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email and password are required' });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email, institutionId: inst._id });
     if (existingUser) {
       return res.status(400).json({ message: 'User with this email already exists' });
     }
@@ -31,6 +35,7 @@ router.post('/register', async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      institutionId: inst._id,
       department,
       designation,
     });
@@ -47,13 +52,15 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, institution } = req.body;
+    const inst = await Institution.findOne({ slug: (institution || req.headers['x-institution'] || 'ku').toLowerCase(), status: 'Active' });
+    if (!inst) return res.status(400).json({ message: 'Institution not found' });
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, institutionId: inst._id });
     if (!user) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
@@ -64,7 +71,7 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id, role: user.role, institutionId: user.institutionId },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -182,7 +189,7 @@ router.patch('/me', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/me/avatar', authMiddleware, avatarUpload.single('avatar'), async (req, res) => {
+router.post('/me/avatar', authMiddleware, avatarUpload.single('avatar'), tenantCtx, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No image uploaded' });
@@ -199,3 +206,5 @@ router.post('/me/avatar', authMiddleware, avatarUpload.single('avatar'), async (
   }
 });
 module.exports = router;
+
+

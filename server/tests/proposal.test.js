@@ -1,4 +1,4 @@
-const request = require('supertest');
+﻿const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const app = require('../server');
@@ -10,6 +10,7 @@ beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
   await mongoose.connect(uri);
+  await require('./helpers/seed').seedKU();
 
   // Register and login a user to get a token for authenticated requests
   await request(app).post('/api/auth/register').send({

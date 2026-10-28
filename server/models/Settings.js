@@ -1,10 +1,9 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 
 const settingsSchema = new mongoose.Schema({
   key: {
     type: String,
     default: 'homepage',
-    unique: true,
   },
   tagline: {
     type: String,
@@ -20,7 +19,7 @@ const settingsSchema = new mongoose.Schema({
   },
   fundedAmount: {
     type: String,
-    default: '৳4.2Cr',
+    default: 'à§³4.2Cr',
   },
   aboutMission: {
     type: String,
@@ -48,4 +47,5 @@ const settingsSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+settingsSchema.index({ institutionId: 1, key: 1 }, { unique: true });
 module.exports = mongoose.model('Settings', settingsSchema);

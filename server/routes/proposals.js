@@ -1,3 +1,4 @@
+﻿const tenantCtx = require('../middleware/tenantCtx');
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -7,7 +8,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 
-// Multer setup — files saved to /uploads folder
+// Multer setup â€” files saved to /uploads folder
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => {
@@ -20,7 +21,7 @@ const upload = multer({ storage });
 router.post(
   '/',
   authMiddleware,
-  upload.array('attachments', 5),
+  upload.array('attachments', 5), tenantCtx,
   async (req, res) => {
     try {
       const { title, abstract, objectives, budget, timeline, coResearchers, isDraft } =
@@ -168,3 +169,4 @@ router.patch('/:id/resubmit', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Server error resubmitting proposal' });
   }
 });
+

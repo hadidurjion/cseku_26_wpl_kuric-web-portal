@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -26,7 +26,7 @@ export default function LoginPage() {
         localStorage.setItem("kuric_token", result.token);
         localStorage.setItem("kuric_user", JSON.stringify(result.user));
       }
-      router.push("/");
+      router.push(result.user?.role === "superadmin" ? "/superadmin" : "/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

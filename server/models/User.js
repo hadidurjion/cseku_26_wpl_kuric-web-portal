@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -8,7 +8,6 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
     lowercase: true,
   },
   password: {
@@ -17,7 +16,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['researcher', 'reviewer', 'officer'],
+    enum: ['researcher', 'reviewer', 'officer', 'superadmin'],
     default: 'researcher',
   },
   department: {
@@ -43,4 +42,5 @@ const userSchema = new mongoose.Schema({
   profileLink: { type: String, default: '' },
 }, { timestamps: true });
 
+userSchema.index({ institutionId: 1, email: 1 }, { unique: true });
 module.exports = mongoose.model('User', userSchema);

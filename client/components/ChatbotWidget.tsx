@@ -1,4 +1,5 @@
-"use client";
+﻿"use client";
+import { siteConfig } from "@/lib/siteConfig";
 
 import { useState, useRef, useEffect } from "react";
 
@@ -7,13 +8,14 @@ interface Message {
   text: string;
 }
 
-const quickQuestions = [
+const baseQuestions = [
   "How do I submit a proposal?",
   "What research areas does KURIC cover?",
   "How can I contact KURIC?",
 ];
 
 export default function ChatbotWidget() {
+  const quickQuestions = baseQuestions.map((q) => q.replace(/KURIC/g, siteConfig.shortName));
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -57,13 +59,13 @@ export default function ChatbotWidget() {
       {open && (
         <div className="mb-3 w-[350px] h-[450px] bg-surface border border-border rounded-2xl shadow-xl flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 bg-teal text-white">
-            <span className="text-sm font-bold">KURIC Assistant</span>
+            <span className="text-sm font-bold">{siteConfig.shortName} Assistant</span>
             <button
               onClick={() => setOpen(false)}
               className="text-white text-lg leading-none"
               aria-label="Close chat"
             >
-              ×
+              Ã—
             </button>
           </div>
 
@@ -71,7 +73,7 @@ export default function ChatbotWidget() {
             {messages.length === 0 && (
               <div className="space-y-2">
                 <p className="text-xs text-muted text-center mb-2">
-                  Ask me anything about KURIC!
+                  Ask me anything about {siteConfig.shortName}!
                 </p>
                 {quickQuestions.map((q) => (
                   <button
@@ -144,7 +146,7 @@ export default function ChatbotWidget() {
         aria-label="Open chat"
       >
         {open ? (
-          <span className="text-2xl leading-none">×</span>
+          <span className="text-2xl leading-none">Ã—</span>
         ) : (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
@@ -154,3 +156,7 @@ export default function ChatbotWidget() {
     </div>
   );
 }
+
+
+
+

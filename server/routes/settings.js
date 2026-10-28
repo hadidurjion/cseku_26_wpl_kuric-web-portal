@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const Settings = require('../models/Settings');
 const authMiddleware = require('../middleware/authMiddleware');
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
   try {
     let settings = await Settings.findOne({ key: 'homepage' });
     if (!settings) {
-      settings = await Settings.create({ key: 'homepage' });
+      settings = await Settings.create(await tenantDefaults(req));
     }
     res.json({ settings });
   } catch (err) {
@@ -96,3 +96,29 @@ router.get('/stats', async (req, res) => {
 });
 
 module.exports = router;
+
+async function tenantDefaults(req) {
+  const Institution = require('../models/Institution');
+  const inst = await Institution.findById(req.institutionId).lean();
+  if (!inst) return { key: 'homepage' };
+  const uni = String(inst.name).replace(/\s+(Research.*|RIC)$/i, '') || inst.name;
+  return {
+    key: 'homepage',
+    aboutMission: `We advance research culture at ${uni} by supporting proposal development, funding pathways and research outputs.`,
+    directorTitle: `Director, ${inst.shortName}RIC`,
+    contactEmail: inst.directorEmail || '',
+    contactAddress: `${uni}, Bangladesh`,
+    directorName: 'Director',
+    contactPhone: '-',
+    activeProjectsCount: '0',
+    publicationsCount: '0',
+    fundedAmount: '0',
+    directorName: 'Director',
+    contactPhone: '-',
+    activeProjectsCount: '0',
+    publicationsCount: '0',
+    fundedAmount: '0',
+  };
+}
+
+

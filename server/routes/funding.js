@@ -1,3 +1,5 @@
+﻿const Institution = require('../models/Institution');
+const tenantCtx = require('../middleware/tenantCtx');
 const express = require('express');
 const multer = require('multer');
 const router = express.Router();
@@ -48,7 +50,8 @@ router.post('/', authMiddleware, requireOfficer, async (req, res) => {
 
     const year = new Date().getFullYear();
     const count = await FundedProject.countDocuments();
-    const fundingNumber = `KURIC-FUND-${year}-${String(count + 1).padStart(3, '0')}`;
+    const instDoc = await Institution.findById(req.institutionId).select("shortName");
+    const fundingNumber = `${instDoc?.shortName || "KU"}RIC-FUND-${year}-${String(count + 1).padStart(3, '0')}`;
 
     const preparedInstallments = installments.map((i, idx) => ({
       label: i.label,
@@ -149,7 +152,7 @@ router.get('/mine/list', authMiddleware, async (req, res) => {
 router.post(
   '/:id/installments/:installmentId/report',
   authMiddleware,
-  upload.single('reportFile'),
+  upload.single('reportFile'), tenantCtx,
   async (req, res) => {
     try {
       const project = await FundedProject.findById(req.params.id);
@@ -175,7 +178,7 @@ router.post(
       await Notification.insertMany(
         officers.map((o) => ({
           user: o._id,
-          message: `Report submitted for "${installment.label}" — ${project.fundingNumber}`,
+          message: `Report submitted for "${installment.label}" â€” ${project.fundingNumber}`,
           link: `/officer/funding/${project._id}`,
         }))
       );
@@ -217,7 +220,7 @@ router.patch(
 
       await Notification.create({
         user: project.researcher,
-        message: `"${installment.label}" (৳${installment.amount.toLocaleString()}) released for ${project.fundingNumber}`,
+        message: `"${installment.label}" (à§³${installment.amount.toLocaleString()}) released for ${project.fundingNumber}`,
         link: `/proposals/funded/${project._id}`,
       });
 
@@ -311,3 +314,5 @@ router.get('/by-proposal/:proposalId', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
+

@@ -1,3 +1,4 @@
+﻿const tenantCtx = require('../middleware/tenantCtx');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -32,7 +33,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, requireOfficer, upload.array('images', 20), async (req, res) => {
+router.post('/', authMiddleware, requireOfficer, upload.array('images', 20), tenantCtx, async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'Please choose at least one image' });

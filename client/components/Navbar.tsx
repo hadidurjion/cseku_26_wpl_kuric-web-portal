@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { siteConfig } from "@/lib/siteConfig";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +16,7 @@ const navLinks = [
   { label: "Events", href: "/events" },
   { label: "Gallery", href: "/gallery" },
   { label: "Contact", href: "/contact" },
+  { label: "All RICs", href: "/rics" },
 ];
 
 const menuByRole: Record<string, { label: string; href: string }[]> = {
@@ -42,12 +43,17 @@ const menuByRole: Record<string, { label: string; href: string }[]> = {
     { label: "Homepage Settings", href: "/officer/settings" },
     { label: "Profile", href: "/profile" },
   ],
+  superadmin: [
+    { label: "Super Admin Dashboard", href: "/superadmin" },
+    { label: "Register a RIC", href: "/register-ric" },
+  ],
 };
 
 export default function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [pending, setPending] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,6 +69,24 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (user?.role !== "superadmin") return;
+    let t = "";
+    try {
+      t = localStorage.getItem("kuric_token") || "";
+    } catch {}
+    fetch("http://localhost:5000/api/superadmin/institutions", {
+      headers: { Authorization: `Bearer ${t}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.institutions) {
+          setPending(d.institutions.filter((i: any) => i.status === "Pending").length);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   function handleLogout() {
     logout();
@@ -115,11 +139,12 @@ export default function Navbar() {
         >
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-teal-tint transition-colors text-xl font-bold text-ink"
+            className="relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-teal-tint transition-colors text-xl font-bold text-ink"
             aria-label="Menu"
             aria-expanded={menuOpen}
           >
             &#8943;
+            {pending > 0 && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-gold" />}
           </button>
 
           {menuOpen && (
@@ -165,6 +190,9 @@ export default function Navbar() {
                       className={itemClass}
                     >
                       {item.label}
+                      {item.href === "/superadmin" && pending > 0 && (
+                        <span className="ml-2 rounded-full bg-gold px-2 py-0.5 text-xs font-bold text-white">{pending}</span>
+                      )}
                     </Link>
                   ))}
                 </div>
@@ -185,3 +213,9 @@ export default function Navbar() {
     </div>
   );
 }
+
+
+
+
+
+

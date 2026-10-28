@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 
 const installmentSchema = new mongoose.Schema({
   label: { type: String, required: true },
@@ -31,7 +31,6 @@ const fundedProjectSchema = new mongoose.Schema({
   fundingNumber: {
     type: String,
     required: true,
-    unique: true,
   },
   totalAmount: {
     type: Number,
@@ -58,4 +57,5 @@ const fundedProjectSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+fundedProjectSchema.index({ institutionId: 1, fundingNumber: 1 }, { unique: true });
 module.exports = mongoose.model('FundedProject', fundedProjectSchema);
